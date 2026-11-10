@@ -1,0 +1,5 @@
+# 大文件走 GitHub Release，不进仓库
+*.tar.gz
+*.zip
+k100-miner
+!/install.sh

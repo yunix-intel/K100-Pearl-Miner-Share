@@ -1,0 +1,434 @@
+[English](README.md) | [简体中文](README.zh-CN.md) | **한국어** | [日本語](README.ja.md)
+
+# K100 Pearl (PRL) 마이너
+
+하이곤 K100_AI (gfx928 DCU) 용 Pearl (PRL) 채굴 소프트웨어입니다.
+**바이너리로만 배포되며 소스 코드는 포함되지 않습니다.**
+
+> ## ⚠️ 개발자 수수료 고지 — 사용 전에 반드시 읽어주세요
+>
+> **이 소프트웨어는 채굴 시간의 2.0%를 개발자에게 사용합니다.**
+>
+> | | |
+> |---|---|
+> | **비율** | **2.0%**, *시간* 기준으로 엄격히 정산 (72시간 시뮬레이션: 1.991%) |
+> | **개발자 지갑** | **바이너리 내부에 암호화되어 저장 — 어디에도 평문으로 표시되지 않음** |
+> | **지갑 지문** | `sha256:6050486ad79f` (앞 12자리 16진수) |
+> | **시작 시** | `[devfee] 2.0% 用于开发者 (钱包指纹 sha256:6050486ad79f)` 출력 |
+> | **채굴 중** | 계정 전환 때마다 누적 비율을 출력 — 2.0% 근처인지 직접 확인 가능 |
+> | **비활성화** | `DEV_FEE_PERMILLE=0` (자가 테스트용; 끄면 수수료 없음) |
+>
+> ### 검증 가능성에 대한 정직한 설명
+>
+> 지갑 주소가 **평문으로 공개되지 않으므로**, **이 2%가 어떤 지갑으로 가는지
+> 독립적으로 검증할 수 없습니다.**
+>
+> 검증할 수 있는 것: **비율이 실제로 2.0%라는 점** (로그의 누적 통계로 확인).
+>
+> **검증 가능한 수취 주소가 필요하다면 이 소프트웨어를 사용하지 마세요.**
+>
+> **이 비율을 받아들일 수 없거나, 수취인이 공개되지 않는 것을 받아들일 수 없다면
+> 이 소프트웨어를 사용하지 마세요.**
+
+---
+
+## 목차
+
+- [개요](#개요)
+- [요구 사항](#요구-사항)
+- [설치](#설치)
+- [사용법](#사용법)
+- [상태 확인](#상태-확인)
+- [중지](#중지)
+- [개발자 수수료 동작 방식](#개발자-수수료-동작-방식)
+- [자주 묻는 질문](#자주-묻는-질문)
+- [문제 해결](#문제-해결)
+- [버전 및 라이선스](#버전-및-라이선스)
+
+---
+
+## 개요
+
+8장 K100_AI 시스템을 위한 완전한 Pearl 채굴 솔루션입니다.
+실측 **620 TH/s** (8장, 풀 집계 기준).
+
+| 항목 | 값 |
+|---|---|
+| 카드당 해시레이트 | 72 TH/s |
+| 8장 합계 | 620 TH/s (풀 표시값; 롤링 윈도우가 채워지며 상승) |
+| attempt 당 | 15.38 ms |
+| 전력 | 400 W/카드 (`power1_cap_max` — 하드웨어 상한) |
+| 온도 | Tj 78–82 °C |
+
+> **⚠️ 풀에 표시되는 해시레이트 ≈ 실제값 × (가동 분 / 60).**
+> 시작 직후에는 약 1/3만 표시되며, 1시간이 지나야 정확해집니다.
+
+### 동작 방식 (개략)
+
+```
+1. 풀에서 job(header + target)을 파싱하고 job key를 도출
+2. GPU에서 A/B 노이즈 행렬 생성
+3. 매 attempt: A측 선택집합 준비 후 MMA 커널 실행
+4. 히트 시: GPU가 계산한 chunk CV를 재사용해 proof를 로컬 생성·제출
+5. 풀은 ~43초마다 새 job 발행; B측은 job별로 캐시 (reuse-B)
+```
+
+---
+
+## 요구 사항
+
+| 항목 | 요구 |
+|---|---|
+| **하드웨어** | 하이곤 K100_AI (gfx928) DCU, 8장 권장 |
+| **드라이버** | 하이곤 DTK **26.04** (`/opt/dtk/dtk-26.04`) |
+| **OS** | Linux x86_64, glibc 2.28+ |
+| **메모리** | ≥ 16 GB |
+| **디스크** | ≥ 200 MB 여유 |
+| **네트워크** | 풀까지 아웃바운드 TCP 8048 |
+| **권한** | root (`/opt/vllm-fork`에 설치) |
+
+### 지원 풀
+
+```
+prl-hk.kryptex.network:8048   (TLS, type:v2 / gzip proof)
+```
+
+> 풀 엔드포인트는 컴파일되어 있습니다. 계정(`--account WALLET/WORKER`)만
+> 사용자가 지정합니다.
+
+---
+
+## 설치
+
+### 1단계 — DTK 설치 확인
+
+```bash
+ls /opt/dtk/dtk-26.04/bin/hipcc    # 존재해야 함
+/opt/dtk/dtk-26.04/bin/rocm-smi    # K100_AI 8장이 보여야 함
+```
+
+실패하면 하이곤 DTK 26.04를 먼저 설치하세요. **없으면 마이너가 시작되지 않습니다.**
+
+### 2단계 — 압축 해제
+
+```bash
+tar xzf k100-miner-v1.0.0-linux-x64.tar.gz
+cd k100-miner-v1.0.0-linux-x64
+```
+
+내용:
+
+```
+k100-miner        마이너 (단일 실행 파일)
+libpearl5.so      GPU 커널 라이브러리
+install.sh        설치 스크립트
+README.md         이 문서
+LICENSE           라이선스
+CHANGELOG.md      변경 기록
+```
+
+### 3단계 — 설치
+
+```bash
+sudo ./install.sh
+```
+
+설치 스크립트가 배치하는 것:
+
+```
+/opt/vllm-fork/k100-miner          실행 파일
+/opt/vllm-fork/libpearl5.so        GPU 라이브러리
+/opt/vllm-fork/start.sh            8장 런처 (CPU 고정 포함)
+/opt/vllm-fork/stop.sh             전체 중지
+/opt/vllm-fork/stat.sh             상태 보고
+/var/log/vllm-fork/                로그 디렉터리
+```
+
+설치 확인:
+
+```bash
+ls -l /opt/vllm-fork/
+/opt/vllm-fork/k100-miner --help
+```
+
+---
+
+## 사용법
+
+### 단일 카드 스모크 테스트 (먼저 이것부터)
+
+```bash
+export LD_LIBRARY_PATH=/opt/dtk/dtk-26.04/lib64:/opt/dtk/dtk-26.04/lib:$LD_LIBRARY_PATH
+
+HIP_VISIBLE_DEVICES=0 /opt/vllm-fork/k100-miner \
+    --account YOUR_WALLET/YOUR_WORKER \
+    --m 8192 --n 65536 --k 2048
+```
+
+**10초 이내에 보여야 하는 출력:**
+
+```
+[init] m=8192 n=65536 k=2048
+[devfee] 2.0% 用于开发者 (钱包指纹 sha256:6050486ad79f)
+[transport] TLS prl-hk.kryptex.network:8048 (TLSv1.3)
+[transport] gzip proof negotiated (type:v2)
+[transport] authorize id=3 result=True error=None
+[job] {"header": "...", "height": "...", "job_id": "...", "target": "..."}
+[init] nbits=0x... cert=3 sess_key=...
+[session] backend ready ...
+[mine] #10 hit=0 15.4ms MAC 71.8 TH/s
+```
+
+**✅ `authorize ... result=True` 와 `[mine]` 줄이 보이면 정상입니다.**
+
+**❌ `target` 이 전부 0이거나 `[mine]` 줄이 없으면 중지하고 [문제 해결](#문제-해결)을 보세요.**
+
+### 8장 운영
+
+```bash
+# 런처가 각 카드를 서로 겹치지 않는 논리 CPU 코어 4개에 고정합니다
+sudo /opt/vllm-fork/start.sh YOUR_WALLET/YOUR_WORKER
+```
+
+선택: 전력 상한 변경 (기본 400 W = 하드웨어 최대)
+
+```bash
+POWER_W=350 sudo /opt/vllm-fork/start.sh YOUR_WALLET/YOUR_WORKER
+```
+
+### 파라미터
+
+| 파라미터 | 기본값 | 설명 |
+|---|---|---|
+| `--account` | **필수** | 풀 계정, 형식 `WALLET/WORKER` |
+| `--m` | 8192 | A 행렬 행 수 (128의 배수) |
+| `--n` | 65536 | B 행렬 열 수 (128의 배수) |
+| `--k` | 2048 | 공통 차원 (32의 배수; ≥ 16 × rank = 2048) |
+| `--attempts` | 0 | 해당 횟수 후 종료; 0 = 무제한 |
+| `--dry-run` | off | 실제 제출 안 함, 출력만 |
+| `--test-job` | off | **풀에 접속하지 않음**; `target = 0` 인 가짜 job 사용 |
+
+> **⚠️ 실제 채굴에는 절대 `--test-job` 을 쓰지 마세요.** 가짜 job(`target = 0`,
+> 히트 확률 0)을 채굴하므로 풀에는 오프라인으로 보이고 수익이 없습니다.
+
+### 환경 변수
+
+| 변수 | 설명 |
+|---|---|
+| `HIP_VISIBLE_DEVICES` | 카드 선택, 예: `0` 또는 `0,1,2,3` |
+| `DEV_FEE_PERMILLE` | 개발자 수수료 (천분율, 기본 `20` = 2.0%). `0` 이면 비활성 |
+| `LD_LIBRARY_PATH` | `/opt/dtk/dtk-26.04/lib64` 포함 필수 |
+
+### 정상 성능 지표
+
+| 지표 | 기대값 |
+|---|---|
+| attempt 당 | 15.0 – 16.5 ms |
+| 카드당 | 68 – 73 TH/s |
+| 8장 | 550 – 580 TH/s (로컬 측정) |
+| 전력 | 400 W 상한에서 카드당 약 395 – 400 W |
+| Tj | 78 – 82 °C |
+
+---
+
+## 상태 확인
+
+```bash
+/opt/vllm-fork/stat.sh
+```
+
+출력 예:
+
+```
+=== 카드별 해시레이트 ===
+  gpu0   72.1 TH/s
+  gpu1   71.8 TH/s
+  ...
+  ═══════════════
+  합계 574 TH/s
+
+=== share ===
+  HIT=386   수락=383   거부=3
+
+=== devfee 상태 ===
+  [devfee] 切到开发者账户  devfee: dev 43s / user 2150s = 2.00% (目标 2.00%), 切换 2 次
+```
+
+### 수동 확인
+
+```bash
+# 실제로 풀에 접속했는가
+grep 'authorize id=3 result=True' /var/log/vllm-fork/gpu0.log | head -1
+
+# share 집계
+grep -c '\[HIT\]'       /var/log/vllm-fork/gpu*.log
+grep -c 'result=True'   /var/log/vllm-fork/gpu*.log
+grep -c 'result=False'  /var/log/vllm-fork/gpu*.log
+
+# 개발자 수수료 — 2.0% 근처인지 확인
+grep 'devfee' /var/log/vllm-fork/gpu*.log | tail -5
+```
+
+> **풀 표시 해시레이트 안내:** 약 60분 롤링 평균입니다.
+> 시작 직후에는 실제값의 약 1/3만 보입니다. **정상이며** share 손실이 아닙니다.
+
+---
+
+## 중지
+
+```bash
+sudo /opt/vllm-fork/stop.sh
+```
+
+확인:
+
+```bash
+ps -ef | grep -c '[k]100-miner'    # 0 이어야 함
+```
+
+---
+
+## 개발자 수수료 동작 방식
+
+**숨기지 않습니다. 전체 메커니즘은 다음과 같습니다.**
+
+### 1. share 개수가 아닌 시간 기준 쿼터
+
+```
+사용자를 위해 49초 채굴할 때마다 개발자에게 1초를 배정 (2%)
+need = user_s × p/(1−p) 공식으로 장기 비율이 편향되지 않게 유지
+```
+
+순진한 방식은 실패합니다:
+
+- "owed > 0 이면 전환"은 과다 지급 (사용자 job 1개 후 dev job 1개 ≈ 50%)
+- "dev 초만큼 차감"은 과소 지급 (dev 구간 자체도 적립되어야 함)
+
+### 2. job 경계에서만 전환
+
+```
+풀은 ~43초마다 새 job을 발행합니다. 개발자 계정으로 전환할 때 재인증하며
+로그에서 확인할 수 있습니다:
+
+  [devfee] 切到开发者账户  devfee: dev 43s / user 2150s = 2.00% (目标 2.00%), 切换 1 次
+```
+
+### 3. 지갑은 바이너리 내부에 암호화
+
+```
+개발자 지갑은 평문 상수가 아닙니다. XOR 암호문 + SHA256 무결성 검사입니다.
+
+- 바이너리에 `strings` 를 걸어도 주소 조각이 나오지 않음
+- 암호문이나 체크섬 1바이트만 바꿔도 시작 시 exit code 3
+```
+
+### 4. 검증할 수 있는 것과 없는 것
+
+| | |
+|---|---|
+| ✅ **검증 가능** | 비율이 실제로 2.0% (로그 누적 통계) |
+| ❌ **검증 불가** | 어느 지갑으로 들어가는지 (주소 비공개) |
+
+**⇒ 검증 가능한 수취 지갑이 필요하다면 이 소프트웨어를 사용하지 마세요.**
+
+---
+
+## 자주 묻는 질문
+
+### Q1. `libpearl5.so: cannot open shared object file`
+
+GPU 라이브러리가 `/opt/vllm-fork/libpearl5.so` 에 없습니다.
+`sudo ./install.sh` 를 다시 실행하거나 `libpearl5.so` 를 직접 복사하세요.
+
+### Q2. `hipGetDeviceCount() = 0`
+
+`LD_LIBRARY_PATH` 에 `lib64` 가 빠졌습니다:
+
+```bash
+export LD_LIBRARY_PATH=/opt/dtk/dtk-26.04/lib64:/opt/dtk/dtk-26.04/lib:$LD_LIBRARY_PATH
+```
+
+### Q3. 풀에서 오프라인으로 보임 / 해시레이트 0
+
+1. 로그에 `authorize ... result=True` 가 있는지 확인
+2. `--account` 가 `WALLET/WORKER` (사이에 슬래시) 인지 확인
+3. **`--test-job` 을 넣지 않았는지 확인** — 가짜 job을 채굴해 풀에는 아무것도 안 보임
+
+### Q4. `integrity check failed` 후 종료
+
+내장 개발자 지갑의 SHA256 검사 실패 — 바이너리가 변조되었습니다.
+공식 릴리스에서 다시 다운로드하세요.
+
+### Q5. 전력이 280 W까지만 오르고 해시레이트가 낮음
+
+수동 실행 대신 `start.sh` 를 쓰세요 — 카드마다 겹치지 않는 논리 CPU 코어 4개를
+고정해 GPU가 CPU측 준비 작업에 굶주리지 않게 합니다.
+이 항목만으로 카드당 280 W → 399 W 가 됩니다.
+
+### Q6. 개발자 수수료 비율을 바꿀 수 있나요?
+
+`DEV_FEE_PERMILLE=0` 으로 비활성화됩니다. 다른 값도 동작합니다 (`=10` 은 1%).
+**비율을 바꿔도 지갑 무결성 검사에는 영향이 없습니다.**
+
+### Q7. 8장 미만으로 돌릴 수 있나요?
+
+가능합니다. `HIP_VISIBLE_DEVICES=0,1` 이면 2장입니다. 해시레이트는 대체로 선형입니다.
+
+### Q8. 풀 표시가 `stat.sh` 보다 낮은 이유?
+
+풀은 약 60분 롤링 평균입니다. 또한 풀은 1 hash = 1 MAC (M·N·K) 으로 집계하는데
+일부 도구는 2·M·N·K (MADD) 로 보고합니다 — 2배 차이입니다.
+이 마이너는 MAC 기준으로 기록하며 풀과 일치합니다.
+
+---
+
+## 문제 해결
+
+### 아무 출력도 없음
+
+```bash
+/opt/vllm-fork/k100-miner --help     # 바이너리 자체가 실행되는가
+ldd /opt/vllm-fork/k100-miner        # 공유 라이브러리가 해결되는가
+```
+
+### `authorize ... result=False`
+
+계정 문자열이 틀렸습니다. 정확히 `WALLET/WORKER` 여야 합니다
+(kryptex는 회선상 `wallet.worker` 를 쓰며, 마이너가 슬래시를 변환합니다).
+
+### share가 수락되지만 `result=False` 가 높음 (> 6%)
+
+share가 만료되고 있습니다. 풀은 ~43초마다 job을 바꾸고 마이너는 50 attempt마다
+새 job을 폴링합니다. 소량 거부(< 6%)는 정상입니다. 훨씬 높다면 풀까지의
+네트워크 지연을 확인하세요.
+
+### 온도가 90 °C 초과
+
+전력 상한을 낮추세요:
+
+```bash
+POWER_W=300 sudo /opt/vllm-fork/start.sh YOUR_WALLET/YOUR_WORKER
+```
+
+> 이 카드의 `power1_cap_max` 는 400 W이며, 초과 값은 드라이버가 거부합니다.
+
+### 로그 위치
+
+```
+/var/log/vllm-fork/gpu0.log … gpu7.log
+```
+
+---
+
+## 버전 및 라이선스
+
+[CHANGELOG.md](CHANGELOG.md) 및 [LICENSE](LICENSE) 참조.
+
+**바이너리 배포 전용 — 소스 코드는 제공되지 않습니다.**
+
+라이선스는 리버스 엔지니어링, 무결성 검사 수정, 개발자 수수료 메커니즘 제거를
+금지합니다.
+
+| 버전 | 날짜 | 비고 |
+|---|---|---|
+| 1.0.0 | 2026-11-10 | 첫 바이너리 릴리스. 카드당 72 TH/s, 8장 620 TH/s. 개발자 수수료 2.0%. |
