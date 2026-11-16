@@ -75,6 +75,29 @@ Measured **620 TH/s** (8 cards, pool accounting metric).
 
 ---
 
+---
+
+## Verify Your Download
+
+**This repository's Release page is the only official distribution channel.**
+We do not publish mirrors.
+
+```bash
+sha256sum k100-miner-v1.0.0-linux-x64.tar.gz
+```
+
+Expected for **v1.0.0**:
+
+```
+715fd8679df8fd22d7e592c8b135fc5d04968cc40ad89d6062374d31be07d803
+```
+
+**If the checksum does not match, do not run the binary.** Someone may have
+repackaged it. Delete it and download again from the Release page.
+
+See [SECURITY.md](SECURITY.md) for the full integrity policy and how to report
+a supply-chain issue.
+
 ## Requirements
 
 | Item | Requirement |
