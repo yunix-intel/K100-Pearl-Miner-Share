@@ -9,19 +9,19 @@
 
 ## 📦 다운로드
 
-**[➡️ v1.0.2 다운로드](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.2)**
+**[➡️ v1.0.3 다운로드](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.3)**
 
 | | |
 |---|---|
-| 패키지 | `k100-miner-v1.0.2-linux-x64.tar.gz` |
+| 패키지 | `k100-miner-v1.0.3-linux-x64.tar.gz` |
 | 크기 | 31.3 MB |
-| SHA256 | `ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f` |
+| SHA256 | `9aa31730914424adea8ea4e72d8c47f18c43d5e5d77fec59574105b28ab84b36` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.2/k100-miner-v1.0.2-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.2-linux-x64.tar.gz          # 위의 SHA256과 일치해야 합니다
-tar xzf k100-miner-v1.0.2-linux-x64.tar.gz
-cd k100-miner-v1.0.2-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.3/k100-miner-v1.0.3-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.3-linux-x64.tar.gz          # 위의 SHA256과 일치해야 합니다
+tar xzf k100-miner-v1.0.3-linux-x64.tar.gz
+cd k100-miner-v1.0.3-linux-x64
 sudo ./install.sh
 ```
 
@@ -113,13 +113,13 @@ sudo ./install.sh
 **이 저장소의 Release 페이지가 유일한 공식 배포 채널입니다.** 미러는 없습니다.
 
 ```bash
-sha256sum k100-miner-v1.0.2-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.3-linux-x64.tar.gz
 ```
 
 v1.0.1 의 올바른 값:
 
 ```
-ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f
+9aa31730914424adea8ea4e72d8c47f18c43d5e5d77fec59574105b28ab84b36
 ```
 
 **체크섬이 일치하지 않으면 실행하지 마세요.** 누군가 다시 패키징한 것입니다.
@@ -133,9 +133,11 @@ ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f
 |---|---|
 | **하드웨어** | 하이곤 K100_AI (gfx928) DCU, 8장 권장 |
 | **드라이버** | 하이곤 DTK **26.04** (`/opt/dtk/dtk-26.04`) |
-| **OS** | Linux x86_64, glibc 2.28+ |
+| **OS** | Linux x86_64, glibc **≥ 2.14** (바이너리 요구사항; Kylin V10 / glibc 2.28 에서 실측) |
 | **메모리** | ≥ 16 GB |
-| **디스크** | ≥ 200 MB 여유 |
+| **디스크** | ≥ 200 MB (설치 트리) |
+| **`/tmp`** | 카드당 약 130 MB (Nuitka 프로세스당 약 123 MB 압축 해제); 8장 ≈ 1 GB |
+| **CPU** | 튜닝된 코어 고정표는 ≥116 논리 코어 필요; 그 미만이면 균등 분배로 자동 전환 |
 | **네트워크** | 풀까지 아웃바운드 TCP 8048 |
 | **권한** | root (`/opt/vllm-fork`에 설치) |
 
@@ -167,8 +169,8 @@ ls /opt/dtk/dtk-26.04/bin/hipcc    # 존재해야 함
 
 
 ```bash
-tar xzf k100-miner-v1.0.2-linux-x64.tar.gz
-cd k100-miner-v1.0.2-linux-x64
+tar xzf k100-miner-v1.0.3-linux-x64.tar.gz
+cd k100-miner-v1.0.3-linux-x64
 ```
 
 내용:
@@ -232,15 +234,20 @@ HIP_VISIBLE_DEVICES=0 /opt/vllm-fork/k100-miner \
 [transport] TLS prl-hk.kryptex.network:8048 (TLSv1.3)
 [transport] gzip proof negotiated (type:v2)
 [transport] authorize id=3 result=True error=None
-[job] {"header": "...", "height": "...", "job_id": "...", "target": "..."}
+[session] {"header": "...", "height": "...", "job_id": "...", "target": "..."}
 [init] nbits=0x... cert=3 sess_key=...
 [session] backend ready ...
-[mine] #10 hit=0 15.4ms MAC 71.8 TH/s
+[compute] #10 hit=0 15.4ms MAC 71.8 TH/s
 ```
 
-**✅ `authorize ... result=True` 와 `[mine]` 줄이 보이면 정상입니다.**
+**✅ `authorize ... result=True` 와 `[compute]` 줄이 보이면 연결되어 채굴 중입니다.**
 
-**❌ `target` 이 전부 0이거나 `[mine]` 줄이 없으면 중지하고 [문제 해결](#문제-해결)을 보세요.**
+> ⚠️ `authorize result=True` 는 풀이 넘겨받은 **문자열**을 받아들였다는 뜻일 뿐,
+> 지갑이 실제로 존재하는지는 검증하지 않습니다. `TEST/TESTW` 같은 임시값도
+> `result=True` 가 되고 share 까지 수락됩니다. **반드시 본인의 실제 지갑을 사용하고**,
+> 잔액은 풀 대시보드에서 확인하십시오. 그것이 유일한 확실한 검증입니다.
+
+**❌ `target` 이 전부 0이거나 `[compute]` 줄이 없으면 중지하고 [문제 해결](#문제-해결)을 보세요.**
 
 ### 8장 운영
 
@@ -307,7 +314,10 @@ POWER_W=350 sudo /opt/vllm-fork/start.sh YOUR_WALLET/YOUR_WORKER
   합계 574 TH/s
 
 === share ===
-  HIT=386   수락=383   거부=3
+  로컬 적중(MATCH)= 386
+  제출(publish)=    384
+  수락=             383
+  거부=             3
 
 === devfee 상태 ===
   [devfee] 切到开发者账户  devfee: dev 43s / user 2150s = 2.00% (目标 2.00%), 切换 2 次
@@ -320,9 +330,11 @@ POWER_W=350 sudo /opt/vllm-fork/start.sh YOUR_WALLET/YOUR_WORKER
 grep 'authorize id=3 result=True' /var/log/vllm-fork/gpu0.log | head -1
 
 # share 집계
-grep -c '\[HIT\]'       /var/log/vllm-fork/gpu*.log
-grep -c 'result=True'   /var/log/vllm-fork/gpu*.log
-grep -c 'result=False'  /var/log/vllm-fork/gpu*.log
+# 주의: authorize 응답도 result=True를 포함합니다 — '◀ id=' 로 실제 share 응답만 필터
+grep -c '\[MATCH\] ★★★'  /var/log/vllm-fork/gpu*.log                        # 로컬 적중
+grep -c '\[publish\] job='  /var/log/vllm-fork/gpu*.log                      # 제출됨
+grep '◀ id=' /var/log/vllm-fork/gpu*.log | grep -c 'result=True'    # 수락
+grep '◀ id=' /var/log/vllm-fork/gpu*.log | grep -c 'result=False'   # 거부
 
 # 개발자 수수료 — 2.0% 근처인지 확인
 grep 'devfee' /var/log/vllm-fork/gpu*.log | tail -5
@@ -491,6 +503,7 @@ POWER_W=300 sudo /opt/vllm-fork/start.sh YOUR_WALLET/YOUR_WORKER
 
 | 버전 | 날짜 | 비고 |
 |---|---|---|
+| 1.0.3 | 2026-11-24 | **보안 릴리스.** 풀 TLS **엄격 검증**(v1.0.0–v1.0.2 는 `CERT_NONE` 으로 MITM 가능). 라이브러리 경로 하드코딩 제거; `stat.sh` 가 `[MATCH]` 로 집계(출력되지 않는 `[HIT]` 대신), `authorize` 를 share 로 세지 않음; 코어 고정표 자동 감지; 설치 전 기존 파일 백업; `--account` 형식 검증. 문서를 실제 바이너리에 맞게 수정. |
 | 1.0.2 | 2026-11-24 | **바이너리 재빌드** (`ea683cbf`). `--help`에서 미사용 `--model`/`--tensor-parallel-size` 등 8개 인자 제거. `stop.sh`가 `/proc/<pid>/exe`로 정확히 매칭(무관 프로세스 오살해 방지). 로그 디렉터리 700/600. 설치 전 의존성 점검. `start.sh`가 `$DST`를 따름. |
 | 1.0.1 | 2026-11-24 | 문서 업데이트. 바이너리 변경 없음 (md5 `7d2a12e5`). 패키지 내 README 갱신; 재현 가능한 빌드용 `make_release.sh` 추가. |
 | 1.0.0 | 2026-11-10 | 첫 바이너리 릴리스. 카드당 72 TH/s, 8장 620 TH/s. 개발자 수수료 2.0%. |

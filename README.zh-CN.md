@@ -9,19 +9,19 @@
 
 ## 📦 下载
 
-**[➡️ 下载 v1.0.2](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.2)**
+**[➡️ 下载 v1.0.3](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.3)**
 
 | | |
 |---|---|
-| 安装包 | `k100-miner-v1.0.2-linux-x64.tar.gz` |
+| 安装包 | `k100-miner-v1.0.3-linux-x64.tar.gz` |
 | 大小 | 31.3 MB |
-| SHA256 | `ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f` |
+| SHA256 | `9aa31730914424adea8ea4e72d8c47f18c43d5e5d77fec59574105b28ab84b36` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.2/k100-miner-v1.0.2-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.2-linux-x64.tar.gz          # 必须与上面的 SHA256 一致
-tar xzf k100-miner-v1.0.2-linux-x64.tar.gz
-cd k100-miner-v1.0.2-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.3/k100-miner-v1.0.3-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.3-linux-x64.tar.gz          # 必须与上面的 SHA256 一致
+tar xzf k100-miner-v1.0.3-linux-x64.tar.gz
+cd k100-miner-v1.0.3-linux-x64
 sudo ./install.sh
 ```
 
@@ -110,13 +110,13 @@ sudo ./install.sh
 **本仓库的 Release 页面是唯一官方发布渠道**，我们没有镜像。
 
 ```bash
-sha256sum k100-miner-v1.0.2-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.3-linux-x64.tar.gz
 ```
 
 v1.0.1 的正确值：
 
 ```
-ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f
+9aa31730914424adea8ea4e72d8c47f18c43d5e5d77fec59574105b28ab84b36
 ```
 
 **校验值对不上就不要运行。** 说明包被人改过。删掉，从 Release 页面重新下载。
@@ -129,9 +129,11 @@ ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f
 |---|---|
 | **硬件** | 海光 K100_AI（gfx928）DCU，建议 8 卡 |
 | **驱动** | 海光 DTK **26.04**（`/opt/dtk/dtk-26.04`）|
-| **系统** | Linux x86_64，glibc 2.28+ |
+| **系统** | Linux x86_64，glibc **≥ 2.14**（二进制要求；在 Kylin V10 / glibc 2.28 上实测）|
 | **内存** | ≥ 16 GB |
-| **磁盘** | ≥ 200 MB 可用 |
+| **磁盘** | ≥ 200 MB（安装目录）|
+| **`/tmp`** | 每卡约 130 MB（Nuitka 每进程解压约 123 MB）；8 卡约 1 GB |
+| **CPU** | 调优绑核表需要 ≥116 逻辑核；核数不足时自动退化为均匀分配 |
 | **网络** | 能出站连矿池 TCP 8048 |
 | **权限** | root（安装到 `/opt/vllm-fork`）|
 
@@ -162,8 +164,8 @@ ls /opt/dtk/dtk-26.04/bin/hipcc    # 必须存在
 
 
 ```bash
-tar xzf k100-miner-v1.0.2-linux-x64.tar.gz
-cd k100-miner-v1.0.2-linux-x64
+tar xzf k100-miner-v1.0.3-linux-x64.tar.gz
+cd k100-miner-v1.0.3-linux-x64
 ```
 
 内容：
@@ -227,15 +229,19 @@ HIP_VISIBLE_DEVICES=0 /opt/vllm-fork/k100-miner \
 [transport] TLS prl-hk.kryptex.network:8048 (TLSv1.3)
 [transport] gzip proof negotiated (type:v2)
 [transport] authorize id=3 result=True error=None
-[job] {"header": "...", "height": "...", "job_id": "...", "target": "..."}
+[session] {"header": "...", "height": "...", "job_id": "...", "target": "..."}
 [init] nbits=0x... cert=3 sess_key=...
 [session] backend ready ...
-[mine] #10 hit=0 15.4ms MAC 71.8 TH/s
+[compute] #10 hit=0 15.4ms MAC 71.8 TH/s
 ```
 
-**✅ 看到 `authorize ... result=True` 和 `[mine]` 行 —— 正常工作。**
+**✅ 看到 `authorize ... result=True` 和 `[compute]` 行 —— 已连上并在算。**
 
-**❌ 如果 `target` 全是 0，或者没有 `[mine]` 行 —— 停下来看[排错](#排错)。**
+> ⚠️ `authorize result=True` 只说明矿池接受了你传的那个**字符串**，不校验钱包是否存在。
+> 像 `TEST/TESTW` 这种占位符也会 `result=True`，甚至 share 也会被接受。
+> **请用你自己的真实钱包**，然后去矿池后台看余额 —— 那才是唯一权威的检查。
+
+**❌ 如果 `target` 全是 0，或者没有 `[compute]` 行 —— 停下来看[排错](#排错)。**
 
 ### 8 卡生产
 
@@ -302,7 +308,10 @@ POWER_W=350 sudo /opt/vllm-fork/start.sh 你的钱包/你的worker
   合计 574 TH/s
 
 === share ===
-  HIT=386   接受=383   拒绝=3
+  命中(本地 MATCH)= 386
+  已提交(publish)=  384
+  接受=             383
+  拒绝=             3
 
 === devfee 状态 ===
   [devfee] 切到开发者账户  devfee: dev 43s / user 2150s = 2.00% (目标 2.00%), 切换 2 次
@@ -315,9 +324,11 @@ POWER_W=350 sudo /opt/vllm-fork/start.sh 你的钱包/你的worker
 grep 'authorize id=3 result=True' /var/log/vllm-fork/gpu0.log | head -1
 
 # share 记账
-grep -c '\[HIT\]'       /var/log/vllm-fork/gpu*.log
-grep -c 'result=True'   /var/log/vllm-fork/gpu*.log
-grep -c 'result=False'  /var/log/vllm-fork/gpu*.log
+# 注意：authorize 的应答也带 result=True —— 用 '◀ id=' 过滤出真正的 share 应答
+grep -c '\[MATCH\] ★★★'  /var/log/vllm-fork/gpu*.log                        # 本地命中
+grep -c '\[publish\] job='  /var/log/vllm-fork/gpu*.log                      # 已提交
+grep '◀ id=' /var/log/vllm-fork/gpu*.log | grep -c 'result=True'    # 接受
+grep '◀ id=' /var/log/vllm-fork/gpu*.log | grep -c 'result=False'   # 拒绝
 
 # 开发者费用 —— 核对是否稳定在 2.0%
 grep 'devfee' /var/log/vllm-fork/gpu*.log | tail -5
@@ -481,6 +492,7 @@ POWER_W=300 sudo /opt/vllm-fork/start.sh 你的钱包/你的worker
 
 | 版本 | 日期 | 说明 |
 |---|---|---|
+| 1.0.3 | 2026-11-24 | **安全修复版。** 到矿池的 TLS 改为**严格校验**（v1.0.0–v1.0.2 用 `CERT_NONE`，可被中间人冒充）。另：库路径不再写死；`stat.sh` 用 `[MATCH]` 统计命中（原来 grep 从不打印的 `[HIT]`）、不再把 `authorize` 算成 share；绑核表自适应核数；安装前备份已有文件；`--account` 格式校验。文档按实际二进制修正。|
 | 1.0.2 | 2026-11-24 | **重新编译二进制**（`ea683cbf`）。`--help` 移除 8 个从未被引用的 `--model`/`--tensor-parallel-size` 等参数。`stop.sh` 改为按 `/proc/<pid>/exe` 精确匹配（不再误杀无关进程）。日志目录 700/600。安装前依赖自检。`start.sh` 跟随 `$DST`。|
 | 1.0.1 | 2026-11-24 | 文档更新，二进制未变（md5 `7d2a12e5`）。包内 README 更新；新增 `make_release.sh` 可复现打包。|
 | 1.0.0 | 2026-11-10 | 首个二进制发布版。单卡 72 TH/s，8 卡 620 TH/s。开发者费用 2.0%。|

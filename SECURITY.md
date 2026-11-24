@@ -81,15 +81,18 @@ For transparency, since you cannot inspect the source:
 |---|---|
 | Reads pool data | job header, target, job_id from the configured pool endpoint |
 | Writes to disk | `/opt/vllm-fork/` (install), `/var/log/vllm-fork/` (logs), `/tmp/last_proof_*` (last submitted proof, for debugging) |
-| Network | outbound TLS to the pool endpoint only |
+| **Unpacks to `/tmp`** | This is a Nuitka `--onefile` binary: each process unpack~123 MB into `/tmp/onefile_<pid>_×××/` at startup and removes it on clean exit. **8 cards ≈ 1 GB of `/tmp`.** A `SIGKILL` or power loss can leave `onefile_*` directories behind — safe to delete when no miner is running. |
+| **Runs `sh -c "ps aux"`** | Once at startup, to count processes. Read-only; nothing from it is transmitted. |
+| Network | outbound TLS to the pool endpoint only. **Certificate verification is strict (v1.0.3+).** v1.0.0–v1.0.2 accepted any certificate (`CERT_NONE`), which allowed a man-in-the-middle to impersonate the pool — do not use those versions on an untrusted network. |
 | Does **not** | phone home, collect telemetry, run a remote shell, modify system files outside the paths above |
-| Dev fee | 2.0% of mining time, settled by time quota, paid to a wallet embedded in the binary |
+| Dev fee | 2.0% of mining time, settled by time quota, paid to a wallet embedded in the binary. **At 2% the first account switch takes ≈2205 s (≈37 min) of user time** — `job_est/(p/(1−p))` with `job_est≈45 s`. |
 
-The dev-fee recipient wallet is **not** published (only its SHA256 fingerprint,
-`6050486ad79f`). You can verify the **rate** from the cumulative statistics the
-miner prints at each account switch, but you cannot verify the recipient. If a
-verifiable payout destination is a requirement for you, do not use this
-software.
+The dev-fee recipient wallet is stored **XOR-obfuscated with a checksum — not
+cryptographically encrypted.** `strings` will not find it, but anyone who unpacks
+the binary's payload can recover the address in minutes. We do not claim otherwise.
+What *is* enforced is integrity: modifying the wallet ciphertext, the key, or the
+checksum makes the miner refuse to start (`exit code 3`), so the fee can neither be
+redirected nor disabled by patching. The SHA256 fingerprint is `6050486ad79f`.
 
 ## Supported versions
 

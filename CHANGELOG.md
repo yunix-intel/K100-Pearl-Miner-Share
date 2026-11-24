@@ -1,5 +1,80 @@
 # 变更记录
 
+## v1.0.3 (2026-11-24)
+
+**安全修复版。建议所有用户升级。**
+
+- `k100-miner` 重新编译（md5 见 Release 页）
+- `libpearl5.so` 未变（`e464446c`）
+
+### 🔴 修复：TLS 证书校验被关闭（中间人可冒充矿池）
+
+v1.0.0–v1.0.2 里 `Transport.connect()` 是：
+
+```python
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode  = ssl.CERT_NONE      # ← 任何证书都接受
+```
+
+后果：能劫持 DNS/路由/ARP 的人可以冒充矿池 —— 读取你的钱包与 worker、
+截获并抢提有效 proof、喂假 job、丢 share。
+
+矿池证书实测是**有效**的（Sectigo 签发，SAN 覆盖 `*.kryptex.network`、
+有效期至 2027-04），因此打开校验没有任何兼容性代价。现在改为默认的严格校验。
+
+### 🔴 修复：库路径写死 `/opt/vllm-fork/libpearl5.so`
+
+旧版 `LIB = '/opt/vllm-fork/libpearl5.so'`，导致 `DST=/other/path` 安装后
+二进制仍去旧路径找库，实际跑不起来（v1.0.2 只修了 `start.sh`，没修二进制）。
+现在顺序为：`K100_LIB` 环境变量 → 与可执行文件同目录 → 旧默认路径。
+
+### 🔴 修复：`stat.sh` 的命中统计永远为 0
+
+旧版 `grep '[HIT]'`，但二进制**从不打印 `[HIT]`**（打印的是 `[MATCH]`）。
+且「接受」把 `authorize` 应答也算成了 share —— 8 卡 0 share 时会显示「接受=8」。
+
+现在按真实标签统计：
+
+```
+命中(本地 MATCH) = grep -c '[MATCH] ★★★'
+已提交(publish)  = grep -c '[publish] job='
+接受             = grep '◀ id=' | grep -c 'result=True'
+拒绝             = grep '◀ id=' | grep -c 'result=False'
+```
+
+### 🟠 修复：`start.sh` 绑核表硬编码，少于 116 核的机器直接失败
+
+旧版绑核表写死 32–115 号核（192 核 K100 的调优值）。少于 116 核的机器
+`taskset` 会报「无效的参数」，矿工起不来。现在按 `nproc` 自适应：
+≥116 核用调优表，否则按卡数均匀分配。
+
+### 🟠 修复：`install.sh` 静默覆盖已有文件
+
+旧版直接 `install -m755` 覆盖 `$DST` 下同名文件。若该目录被别的程序
+（例如真的 vLLM fork）占用，会被无提示破坏。
+现在覆盖前先备份到 `<DST>.bak.<时间戳>` 并打印还原命令。
+
+### 🟠 修复：`--account` 格式错误直接抛 Traceback
+
+旧版传 `--account TESTONLY`（无斜杠）会崩出 Traceback + exit 1。
+现在提前校验并给出可读报错。
+
+### 🟡 文档修正（多处与实现不符）
+
+| 原文档 | 实际 | 已改为 |
+|---|---|---|
+| 让用户找 `[mine]` 行判断正常 | 二进制打印 `[compute]`，从不打印 `[mine]` | `[compute]` |
+| 示例日志行 `[job] {...}` | 二进制打印 `[session] {...}` | `[session]` |
+| 「`authorize result=True` 表示正常」 | 矿池接受任意字符串；`TEST/TESTW` 也是 `True`，share 也被接受 | 明确说明这不是钱包校验；要看矿池后台余额 |
+| 「45 秒后切到开发者账户」 | 2% 下首切 = `job_est/(p/(1−p))` ≈ **2205 秒（37 分钟）**；45 秒对应的是 50% 费率 | 已如实写明 |
+| 磁盘要求 ≥200 MB | 每进程还要解压约 123 MB 到 `/tmp`，8 卡约 1 GB | 补 `/tmp` 与 CPU 核数要求 |
+| `glibc 2.28+` | 二进制实际只需 `GLIBC_2.14` | 改为 ≥2.14（注明实测环境 2.28） |
+| 「钱包加密内嵌、永不明文、无法验证收款方」 | XOR 混淆，可还原（已实测） | SECURITY.md 已如实说明：混淆≠加密、可还原；但改任一常量 → exit 3 |
+| 未披露 `sh -c "ps aux"` 与 `/tmp/onefile_*` | 启动时各执行一次 / 解压 | SECURITY.md 已披露 |
+
+---
+
 ## v1.0.2 (2026-11-24)
 
 **首次包含重新编译的二进制。**
@@ -104,4 +179,5 @@ Traceback  0
 | **400 W** | **577 TH/s** | 77–81 °C | 0.180 TH/W |
 
 单卡 73.9 TH/s（14.9 ms/attempt），19 accepted / 0 rejected，
-45 秒后切到开发者账户，6 个 share 全部 `result=True`。
+开发者账户切换验证：**按本版代码的公式，2% 下第一次切换约需 2205 秒（≈37 分钟）用户时长** —— 首切时间 = `job_est / (p/(1-p))`，`job_est≈45s`、`p=0.02`。
+早期文档写的「45 秒后切换」是错的（那对应的是 50% 费率，不是 2%）。

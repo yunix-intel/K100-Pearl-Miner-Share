@@ -9,19 +9,19 @@ A Pearl (PRL) mining application for Hygon K100_AI (gfx928) DCUs.
 
 ## 📦 Download
 
-**[➡️ Download v1.0.2](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.2)**
+**[➡️ Download v1.0.3](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.3)**
 
 | | |
 |---|---|
-| Package | `k100-miner-v1.0.2-linux-x64.tar.gz` |
+| Package | `k100-miner-v1.0.3-linux-x64.tar.gz` |
 | Size | 31.3 MB |
-| SHA256 | `ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f` |
+| SHA256 | `9aa31730914424adea8ea4e72d8c47f18c43d5e5d77fec59574105b28ab84b36` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.2/k100-miner-v1.0.2-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.2-linux-x64.tar.gz          # must match the SHA256 above
-tar xzf k100-miner-v1.0.2-linux-x64.tar.gz
-cd k100-miner-v1.0.2-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.3/k100-miner-v1.0.3-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.3-linux-x64.tar.gz          # must match the SHA256 above
+tar xzf k100-miner-v1.0.3-linux-x64.tar.gz
+cd k100-miner-v1.0.3-linux-x64
 sudo ./install.sh
 ```
 
@@ -115,13 +115,13 @@ Measured **620 TH/s** (8 cards, pool accounting metric).
 We do not publish mirrors.
 
 ```bash
-sha256sum k100-miner-v1.0.2-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.3-linux-x64.tar.gz
 ```
 
-Expected for **v1.0.2**:
+Expected for **v1.0.3**:
 
 ```
-ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f
+9aa31730914424adea8ea4e72d8c47f18c43d5e5d77fec59574105b28ab84b36
 ```
 
 **If the checksum does not match, do not run the binary.** Someone may have
@@ -136,9 +136,11 @@ a supply-chain issue.
 |---|---|
 | **Hardware** | Hygon K100_AI (gfx928) DCU, 8 cards recommended |
 | **Driver** | Hygon DTK **26.04** (`/opt/dtk/dtk-26.04`) |
-| **OS** | Linux x86_64, glibc 2.28+ |
+| **OS** | Linux x86_64, glibc **≥ 2.14** (binary requirement; tested on Kylin V10 / glibc 2.28) |
 | **Memory** | ≥ 16 GB |
-| **Disk** | ≥ 200 MB free |
+| **Disk** | ≥ 200 MB for the install tree |
+| **`/tmp`** | ≈130 MB **per card** (Nuitka unpacks ~123 MB per process); 8 cards ≈ 1 GB |
+| **CPU** | ≥ 116 logical cores for the tuned pin table; fewer cores fall back to an even split |
 | **Network** | Outbound TCP 8048 to the pool |
 | **Permissions** | root (to install into `/opt/vllm-fork`) |
 
@@ -170,8 +172,8 @@ If this fails, install Hygon DTK 26.04 first. **The miner will not start without
 
 
 ```bash
-tar xzf k100-miner-v1.0.2-linux-x64.tar.gz
-cd k100-miner-v1.0.2-linux-x64
+tar xzf k100-miner-v1.0.3-linux-x64.tar.gz
+cd k100-miner-v1.0.3-linux-x64
 ```
 
 Contents:
@@ -235,15 +237,21 @@ HIP_VISIBLE_DEVICES=0 /opt/vllm-fork/k100-miner \
 [transport] TLS prl-hk.kryptex.network:8048 (TLSv1.3)
 [transport] gzip proof negotiated (type:v2)
 [transport] authorize id=3 result=True error=None
-[job] {"header": "...", "height": "...", "job_id": "...", "target": "..."}
+[session] {"header": "...", "height": "...", "job_id": "...", "target": "..."}
 [init] nbits=0x... cert=3 sess_key=...
 [session] backend ready ...
-[mine] #10 hit=0 15.4ms MAC 71.8 TH/s
+[compute] #10 hit=0 15.4ms MAC 71.8 TH/s
 ```
 
-**✅ If you see `authorize ... result=True` and `[mine]` lines — it is working.**
+**✅ If you see `authorize ... result=True` and `[compute]` lines — it is connected and mining.**
 
-**❌ If `target` is all zeros, or there are no `[mine]` lines — stop and read
+> ⚠️ `authorize result=True` only means the pool accepted the *string* you passed.
+> The pool does not validate whether the wallet exists, so a placeholder such as
+> `TEST/TESTW` also gets `result=True` and even gets shares accepted. **Use your real
+> wallet**, and verify your balance on the pool's dashboard — that is the only
+> authoritative check.
+
+**❌ If `target` is all zeros, or there are no `[compute]` lines — stop and read
 [Troubleshooting](#troubleshooting).**
 
 ### 8-card production
@@ -311,7 +319,10 @@ Sample output:
   Total 574 TH/s
 
 === Shares ===
-  HIT=386   accepted=383   rejected=3
+  local hits (MATCH) = 386
+  submitted (publish) = 384
+  accepted = 383
+  rejected = 3
 
 === devfee status ===
   [devfee] 切到开发者账户  devfee: dev 43s / user 2150s = 2.00% (目标 2.00%), 切换 2 次
@@ -324,9 +335,11 @@ Sample output:
 grep 'authorize id=3 result=True' /var/log/vllm-fork/gpu0.log | head -1
 
 # Share accounting
-grep -c '\[HIT\]'       /var/log/vllm-fork/gpu*.log
-grep -c 'result=True'   /var/log/vllm-fork/gpu*.log
-grep -c 'result=False'  /var/log/vllm-fork/gpu*.log
+# NOTE: the authorize reply also carries result=True — filter to '◀ id=' (share replies)
+grep -c '\[MATCH\] ★★★'  /var/log/vllm-fork/gpu*.log                        # local hits
+grep -c '\[publish\] job='  /var/log/vllm-fork/gpu*.log                      # submitted
+grep '◀ id=' /var/log/vllm-fork/gpu*.log | grep -c 'result=True'    # accepted
+grep '◀ id=' /var/log/vllm-fork/gpu*.log | grep -c 'result=False'   # rejected
 
 # Developer fee — verify it stays near 2.0%
 grep 'devfee' /var/log/vllm-fork/gpu*.log | tail -5
@@ -496,6 +509,7 @@ fee mechanism is prohibited by the license.
 
 | Version | Date | Notes |
 |---|---|---|
+| 1.0.3 | 2026-11-24 | **Security release.** TLS to the pool is now **strictly verified** (v1.0.0–v1.0.2 used `CERT_NONE`, allowing MITM). Also: library path no longer hardcoded; `stat.sh` counts `[MATCH]` (not the never-printed `[HIT]`) and no longer counts `authorize` as a share; CPU pin table auto-detects; installer backs up existing files first; `--account` format validated. Docs corrected against the real binary. |
 | 1.0.2 | 2026-11-24 | **Rebuilt binary** (`ea683cbf`). Removed 8 unused `--model`/`--tensor-parallel-size`-style args from `--help`. `stop.sh` now matches by `/proc/<pid>/exe` (no more killing unrelated processes). Log dir 700/600. Pre-install dependency check. `start.sh` follows `$DST`. |
 | 1.0.1 | 2026-11-24 | Documentation update. Binary unchanged (md5 `7d2a12e5`). Bundled READMEs refreshed; `make_release.sh` added for reproducible builds. |
 | 1.0.0 | 2026-11-10 | First binary release. 72 TH/s per card, 620 TH/s on 8 cards. 2.0% dev fee. |

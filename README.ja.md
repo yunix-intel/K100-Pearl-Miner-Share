@@ -9,19 +9,19 @@ Hygon K100_AI (gfx928 DCU) 用の Pearl (PRL) 採掘ソフトウェアです。
 
 ## 📦 ダウンロード
 
-**[➡️ v1.0.2 をダウンロード](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.2)**
+**[➡️ v1.0.3 をダウンロード](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.3)**
 
 | | |
 |---|---|
-| パッケージ | `k100-miner-v1.0.2-linux-x64.tar.gz` |
+| パッケージ | `k100-miner-v1.0.3-linux-x64.tar.gz` |
 | サイズ | 31.3 MB |
-| SHA256 | `ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f` |
+| SHA256 | `9aa31730914424adea8ea4e72d8c47f18c43d5e5d77fec59574105b28ab84b36` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.2/k100-miner-v1.0.2-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.2-linux-x64.tar.gz          # 上記の SHA256 と一致する必要があります
-tar xzf k100-miner-v1.0.2-linux-x64.tar.gz
-cd k100-miner-v1.0.2-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.3/k100-miner-v1.0.3-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.3-linux-x64.tar.gz          # 上記の SHA256 と一致する必要があります
+tar xzf k100-miner-v1.0.3-linux-x64.tar.gz
+cd k100-miner-v1.0.3-linux-x64
 sudo ./install.sh
 ```
 
@@ -113,13 +113,13 @@ sudo ./install.sh
 **このリポジトリの Release ページが唯一の公式配布チャネルです。** ミラーはありません。
 
 ```bash
-sha256sum k100-miner-v1.0.2-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.3-linux-x64.tar.gz
 ```
 
 v1.0.1 の正しい値:
 
 ```
-ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f
+9aa31730914424adea8ea4e72d8c47f18c43d5e5d77fec59574105b28ab84b36
 ```
 
 **チェックサムが一致しない場合は実行しないでください。** 誰かが再パッケージ
@@ -134,9 +134,11 @@ ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f
 |---|---|
 | **ハードウェア** | Hygon K100_AI (gfx928) DCU、8 枚推奨 |
 | **ドライバ** | Hygon DTK **26.04**（`/opt/dtk/dtk-26.04`）|
-| **OS** | Linux x86_64、glibc 2.28+ |
+| **OS** | Linux x86_64、glibc **≥ 2.14**(バイナリ要件; Kylin V10 / glibc 2.28 で実測)|
 | **メモリ** | ≥ 16 GB |
-| **ディスク** | 空き ≥ 200 MB |
+| **ディスク** | ≥ 200 MB(インストールツリー)|
+| **`/tmp`** | カードあたり約 130 MB(Nuitka がプロセスごとに約 123 MB 展開); 8 枚で約 1 GB |
+| **CPU** | チューニング済みのコア固定表は ≥116 論理コアが必要; それ未満なら均等割り当てに自動フォールバック |
 | **ネットワーク** | プールへの外向き TCP 8048 |
 | **権限** | root（`/opt/vllm-fork` へインストール）|
 
@@ -169,8 +171,8 @@ ls /opt/dtk/dtk-26.04/bin/hipcc    # 存在すること
 
 
 ```bash
-tar xzf k100-miner-v1.0.2-linux-x64.tar.gz
-cd k100-miner-v1.0.2-linux-x64
+tar xzf k100-miner-v1.0.3-linux-x64.tar.gz
+cd k100-miner-v1.0.3-linux-x64
 ```
 
 内容:
@@ -234,15 +236,20 @@ HIP_VISIBLE_DEVICES=0 /opt/vllm-fork/k100-miner \
 [transport] TLS prl-hk.kryptex.network:8048 (TLSv1.3)
 [transport] gzip proof negotiated (type:v2)
 [transport] authorize id=3 result=True error=None
-[job] {"header": "...", "height": "...", "job_id": "...", "target": "..."}
+[session] {"header": "...", "height": "...", "job_id": "...", "target": "..."}
 [init] nbits=0x... cert=3 sess_key=...
 [session] backend ready ...
-[mine] #10 hit=0 15.4ms MAC 71.8 TH/s
+[compute] #10 hit=0 15.4ms MAC 71.8 TH/s
 ```
 
-**✅ `authorize ... result=True` と `[mine]` 行が出ていれば正常です。**
+**✅ `authorize ... result=True` と `[compute]` 行が出ていれば、接続して計算中です。**
 
-**❌ `target` が全て 0、または `[mine]` 行が無い場合は中止し、
+> ⚠️ `authorize result=True` は、渡した**文字列**をプールが受け付けたという意味だけです。
+> ウォレットが実在するかは検証されません。`TEST/TESTW` のようなプレースホルダでも
+> `result=True` になり、share も受理されます。**必ず自分の実ウォレットを使ってください。**
+> 残高はプールのダッシュボードで確認するのが唯一の確実な方法です。
+
+**❌ `target` が全て 0、または `[compute]` 行が無い場合は中止し、
 [トラブルシューティング](#トラブルシューティング) を参照してください。**
 
 ### 8 枚での本番運用
@@ -311,7 +318,10 @@ POWER_W=350 sudo /opt/vllm-fork/start.sh YOUR_WALLET/YOUR_WORKER
   合計 574 TH/s
 
 === share ===
-  HIT=386   受理=383   拒否=3
+  ローカル命中(MATCH)= 386
+  送信(publish)=       384
+  受理=                383
+  拒否=                3
 
 === devfee 状態 ===
   [devfee] 切到开发者账户  devfee: dev 43s / user 2150s = 2.00% (目标 2.00%), 切换 2 次
@@ -324,9 +334,11 @@ POWER_W=350 sudo /opt/vllm-fork/start.sh YOUR_WALLET/YOUR_WORKER
 grep 'authorize id=3 result=True' /var/log/vllm-fork/gpu0.log | head -1
 
 # share の集計
-grep -c '\[HIT\]'       /var/log/vllm-fork/gpu*.log
-grep -c 'result=True'   /var/log/vllm-fork/gpu*.log
-grep -c 'result=False'  /var/log/vllm-fork/gpu*.log
+# 注意: authorize の応答にも result=True が付きます — '◀ id=' で実際の share 応答のみ抽出
+grep -c '\[MATCH\] ★★★'  /var/log/vllm-fork/gpu*.log                        # ローカル命中
+grep -c '\[publish\] job='  /var/log/vllm-fork/gpu*.log                      # 送信済み
+grep '◀ id=' /var/log/vllm-fork/gpu*.log | grep -c 'result=True'    # 受理
+grep '◀ id=' /var/log/vllm-fork/gpu*.log | grep -c 'result=False'   # 拒否
 
 # 開発者手数料 — 2.0% 付近か確認
 grep 'devfee' /var/log/vllm-fork/gpu*.log | tail -5
@@ -496,6 +508,7 @@ POWER_W=300 sudo /opt/vllm-fork/start.sh YOUR_WALLET/YOUR_WORKER
 
 | バージョン | 日付 | 備考 |
 |---|---|---|
+| 1.0.3 | 2026-11-24 | **セキュリティリリース.** プールへの TLS を**厳格検証**(v1.0.0–v1.0.2 は `CERT_NONE` で MITM 可能)。ライブラリパスのハードコードを廃止; `stat.sh` は `[MATCH]` で集計(出力されない `[HIT]` の代わり)、`authorize` を share として数えない; コア固定表を自動検出; インストール前に既存ファイルをバックアップ; `--account` 形式検証。ドキュメントを実バイナリに合わせて修正。|
 | 1.0.2 | 2026-11-24 | **バイナリ再ビルド** (`ea683cbf`)。`--help` から未使用の `--model`/`--tensor-parallel-size` 等 8 引数を削除。`stop.sh` は `/proc/<pid>/exe` で厳密一致(無関係プロセスの誤殺を防止)。ログディレクトリ 700/600。インストール前依存性チェック。`start.sh` は `$DST` に追従。|
 | 1.0.1 | 2026-11-24 | ドキュメント更新。バイナリは変更なし (md5 `7d2a12e5`)。同梱 README を更新; 再現可能ビルド用 `make_release.sh` を追加。|
 | 1.0.0 | 2026-11-10 | 初のバイナリリリース。カードあたり 72 TH/s、8 枚で 620 TH/s。開発者手数料 2.0%。 |
