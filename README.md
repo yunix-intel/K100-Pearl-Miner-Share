@@ -9,19 +9,19 @@ A Pearl (PRL) mining application for Hygon K100_AI (gfx928) DCUs.
 
 ## 📦 Download
 
-**[➡️ Download v1.0.1](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.1)**
+**[➡️ Download v1.0.2](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.2)**
 
 | | |
 |---|---|
-| Package | `k100-miner-v1.0.1-linux-x64.tar.gz` |
+| Package | `k100-miner-v1.0.2-linux-x64.tar.gz` |
 | Size | 29.8 MB |
-| SHA256 | `d8ed939d9ebc0cbe974dbb34af1cadf91df0863d78af3fc71eb83fbeb13a7f5a` |
+| SHA256 | `ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.1/k100-miner-v1.0.1-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.1-linux-x64.tar.gz          # must match the SHA256 above
-tar xzf k100-miner-v1.0.1-linux-x64.tar.gz
-cd k100-miner-v1.0.1-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.2/k100-miner-v1.0.2-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.2-linux-x64.tar.gz          # must match the SHA256 above
+tar xzf k100-miner-v1.0.2-linux-x64.tar.gz
+cd k100-miner-v1.0.2-linux-x64
 sudo ./install.sh
 ```
 
@@ -38,7 +38,7 @@ sudo ./install.sh
 > | | |
 > |---|---|
 > | **Rate** | **2.0%**, settled strictly by *time* (72-hour simulation: 1.991%) |
-> | **Dev wallet** | **Encrypted inside the binary — never appears in plaintext anywhere** |
+> | **Dev wallet** | **Obfuscated (XOR + checksum) inside the binary — no plaintext copy** |
 > | **Wallet fingerprint** | `sha256:6050486ad79f` (first 12 hex chars) |
 > | **On startup** | prints `[devfee] 2.0% 用于开发者 (钱包指纹 sha256:6050486ad79f)` |
 > | **During mining** | prints the cumulative ratio at every account switch — you can verify it stays near 2.0% |
@@ -46,15 +46,20 @@ sudo ./install.sh
 >
 > ### Honest statement about verifiability
 >
-> Because the wallet address is **not** published in plaintext, **you cannot independently
-> verify which wallet receives this 2%.**
+> The wallet is XOR-obfuscated with a checksum, **not encrypted in any meaningful
+> cryptographic sense.** `strings` will not find it, but someone who decompresses the
+> binary's payload can recover the address in minutes. **We do not claim otherwise.**
 >
-> What you *can* verify: **the rate really is 2.0%** (from the cumulative statistics in the log).
+> What **is** enforced is integrity: modifying the wallet ciphertext, the key, or the
+> checksum makes the miner refuse to start (`exit code 3`), so the fee can neither be
+> redirected nor disabled by patching.
 >
-> **If you require a verifiable recipient address, do not use this software.**
+> What you can verify from the logs: **the rate really is 2.0%** (cumulative statistics
+> printed at every account switch).
 >
-> **If you do not accept this rate, or do not accept that the recipient is not disclosed,
-> do not use this software.**
+> **If you require a cryptographically hidden recipient, do not use this software.**
+>
+> **If you do not accept this rate, do not use this software.**
 
 ---
 
@@ -110,13 +115,13 @@ Measured **620 TH/s** (8 cards, pool accounting metric).
 We do not publish mirrors.
 
 ```bash
-sha256sum k100-miner-v1.0.1-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.2-linux-x64.tar.gz
 ```
 
-Expected for **v1.0.1**:
+Expected for **v1.0.2**:
 
 ```
-d8ed939d9ebc0cbe974dbb34af1cadf91df0863d78af3fc71eb83fbeb13a7f5a
+ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f
 ```
 
 **If the checksum does not match, do not run the binary.** Someone may have
@@ -165,8 +170,8 @@ If this fails, install Hygon DTK 26.04 first. **The miner will not start without
 
 
 ```bash
-tar xzf k100-miner-v1.0.1-linux-x64.tar.gz
-cd k100-miner-v1.0.1-linux-x64
+tar xzf k100-miner-v1.0.2-linux-x64.tar.gz
+cd k100-miner-v1.0.2-linux-x64
 ```
 
 Contents:
@@ -185,6 +190,10 @@ CHANGELOG.md      change log
 ```bash
 sudo ./install.sh
 ```
+
+The installer first runs a **7-item dependency check** (DTK 26.04, `hipcc`,
+`rocm-smi`, detected card count, glibc ≥ 2.14, `python3`, package files).
+If anything fails it aborts **before installing anything**, with exit code 2.
 
 The installer places:
 
@@ -382,9 +391,10 @@ plus a SHA256 integrity check.
 | | |
 |---|---|
 | ✅ **Can verify** | The rate really is 2.0% (from the cumulative log statistics) |
-| ❌ **Cannot verify** | Which wallet receives it (the address is not published) |
+| ⚠️ **Can recover with effort** | The address is XOR-obfuscated, not cryptographically hidden — decompressing the payload reveals it in minutes |
+| ✅ **Cannot be changed, though** | Any modification to the ciphertext / key / checksum makes the miner refuse to start (`exit 3`) |
 
-**⇒ If a verifiable payout destination is a requirement for you, do not use this software.**
+**⇒ If a cryptographically hidden payout destination is a requirement for you, do not use this software.**
 
 ---
 
@@ -486,5 +496,6 @@ fee mechanism is prohibited by the license.
 
 | Version | Date | Notes |
 |---|---|---|
+| 1.0.2 | 2026-11-24 | **Rebuilt binary** (`ea683cbf`). Removed 8 unused `--model`/`--tensor-parallel-size`-style args from `--help`. `stop.sh` now matches by `/proc/<pid>/exe` (no more killing unrelated processes). Log dir 700/600. Pre-install dependency check. `start.sh` follows `$DST`. |
 | 1.0.1 | 2026-11-24 | Documentation update. Binary unchanged (md5 `7d2a12e5`). Bundled READMEs refreshed; `make_release.sh` added for reproducible builds. |
 | 1.0.0 | 2026-11-10 | First binary release. 72 TH/s per card, 620 TH/s on 8 cards. 2.0% dev fee. |

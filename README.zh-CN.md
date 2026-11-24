@@ -9,19 +9,19 @@
 
 ## 📦 下载
 
-**[➡️ 下载 v1.0.1](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.1)**
+**[➡️ 下载 v1.0.2](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.2)**
 
 | | |
 |---|---|
-| 安装包 | `k100-miner-v1.0.1-linux-x64.tar.gz` |
+| 安装包 | `k100-miner-v1.0.2-linux-x64.tar.gz` |
 | 大小 | 29.8 MB |
-| SHA256 | `d8ed939d9ebc0cbe974dbb34af1cadf91df0863d78af3fc71eb83fbeb13a7f5a` |
+| SHA256 | `ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.1/k100-miner-v1.0.1-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.1-linux-x64.tar.gz          # 必须与上面的 SHA256 一致
-tar xzf k100-miner-v1.0.1-linux-x64.tar.gz
-cd k100-miner-v1.0.1-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.2/k100-miner-v1.0.2-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.2-linux-x64.tar.gz          # 必须与上面的 SHA256 一致
+tar xzf k100-miner-v1.0.2-linux-x64.tar.gz
+cd k100-miner-v1.0.2-linux-x64
 sudo ./install.sh
 ```
 
@@ -37,7 +37,7 @@ sudo ./install.sh
 > | | |
 > |---|---|
 > | **比例** | **2.0%**，严格按*时间*结算（72 小时模拟：1.991%）|
-> | **开发者钱包** | **加密内嵌在二进制里，任何地方都不出现明文** |
+> | **开发者钱包** | **二进制内 XOR 混淆 + 校验和 —— 无明文副本** |
 > | **钱包指纹** | `sha256:6050486ad79f`（前 12 位十六进制）|
 > | **启动时** | 打印 `[devfee] 2.0% 用于开发者 (钱包指纹 sha256:6050486ad79f)` |
 > | **运行中** | 每次切换账户都打印累计比例，你可以核对它是否稳定在 2.0% 附近 |
@@ -45,13 +45,17 @@ sudo ./install.sh
 >
 > ### 关于可验证性的诚实说明
 >
-> 因为钱包地址**不以明文公开**，**你无法独立验证这 2% 最终流向哪个钱包。**
+> 钱包是 **XOR 混淆 + 校验和**，**不是密码学意义上的加密**。`strings` 搜不到，
+> 但有人把二进制载荷解压出来，几分钟就能还原地址。**我们不宣称它能藏住。**
 >
-> 你**能**验证的是：**比例确实是 2.0%**（从日志里的累计统计看）。
+> **真正强制的是完整性**：改动钱包密文、密钥或校验和中的任何一个，程序都会
+> 拒绝启动（`exit code 3`），所以这笔费用既改不了收款方、也没法靠打补丁关掉。
 >
-> **如果你需要可验证的收款方地址，请不要使用本软件。**
+> 你能从日志验证的是：**比例确实是 2.0%**（每次账户切换都会打印累计统计）。
 >
-> **如果你不接受这个比例，或不接受"收款方不公开"，请不要使用本软件。**
+> **如果你需要密码学意义上藏住的收款方，请不要使用本软件。**
+>
+> **如果你不能接受这个比例，请不要使用本软件。**
 
 ---
 
@@ -106,13 +110,13 @@ sudo ./install.sh
 **本仓库的 Release 页面是唯一官方发布渠道**，我们没有镜像。
 
 ```bash
-sha256sum k100-miner-v1.0.1-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.2-linux-x64.tar.gz
 ```
 
 v1.0.1 的正确值：
 
 ```
-d8ed939d9ebc0cbe974dbb34af1cadf91df0863d78af3fc71eb83fbeb13a7f5a
+ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f
 ```
 
 **校验值对不上就不要运行。** 说明包被人改过。删掉，从 Release 页面重新下载。
@@ -158,8 +162,8 @@ ls /opt/dtk/dtk-26.04/bin/hipcc    # 必须存在
 
 
 ```bash
-tar xzf k100-miner-v1.0.1-linux-x64.tar.gz
-cd k100-miner-v1.0.1-linux-x64
+tar xzf k100-miner-v1.0.2-linux-x64.tar.gz
+cd k100-miner-v1.0.2-linux-x64
 ```
 
 内容：
@@ -178,6 +182,10 @@ CHANGELOG.md      变更记录
 ```bash
 sudo ./install.sh
 ```
+
+安装脚本会先做 **7 项依赖自检**（DTK 26.04、`hipcc`、`rocm-smi`、检测到的卡数、
+glibc ≥ 2.14、`python3`、包内文件）。任一项不通过会**在安装任何东西之前中止**，
+退出码 2。
 
 安装脚本会放置：
 
@@ -372,9 +380,10 @@ ps -ef | grep -c '[k]100-miner'    # 应为 0
 | | |
 |---|---|
 | ✅ **能验证** | 比例确实是 2.0%（从日志的累计统计看）|
-| ❌ **不能验证** | 钱最终进哪个钱包（地址不公开）|
+| ⚠️ **可以还原，但要费点事** | 地址是 XOR 混淆，不是密码学隐藏 —— 解压载荷几分钟就能还原 |
+| ✅ **但改不了** | 改动密文 / 密钥 / 校验和中的任何一个，程序都会拒绝启动（`exit 3`）|
 
-**⇒ 如果你要求收款方地址可验证，请不要使用本软件。**
+**⇒ 如果你要求收款方在密码学意义上被藏住，请不要使用本软件。**
 
 ---
 
@@ -472,5 +481,6 @@ POWER_W=300 sudo /opt/vllm-fork/start.sh 你的钱包/你的worker
 
 | 版本 | 日期 | 说明 |
 |---|---|---|
+| 1.0.2 | 2026-11-24 | **重新编译二进制**（`ea683cbf`）。`--help` 移除 8 个从未被引用的 `--model`/`--tensor-parallel-size` 等参数。`stop.sh` 改为按 `/proc/<pid>/exe` 精确匹配（不再误杀无关进程）。日志目录 700/600。安装前依赖自检。`start.sh` 跟随 `$DST`。|
 | 1.0.1 | 2026-11-24 | 文档更新，二进制未变（md5 `7d2a12e5`）。包内 README 更新；新增 `make_release.sh` 可复现打包。|
 | 1.0.0 | 2026-11-10 | 首个二进制发布版。单卡 72 TH/s，8 卡 620 TH/s。开发者费用 2.0%。|

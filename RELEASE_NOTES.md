@@ -1,15 +1,23 @@
-# v1.0.1 — Documentation update (binary unchanged)
+# v1.0.2 — Rebuilt binary + install/stop fixes
 
-## What changed in v1.0.1
+## What changed in v1.0.2
 
-**The binary is byte-identical to v1.0.0.** Only the bundled documentation changed.
+**The binary was rebuilt for this release** (first rebuild since v1.0.0).
+Reason: v1.0.0/v1.0.1's `--help` exposed 8 leftover vLLM-style options that the
+code never referenced. Removing them requires a recompile.
 
-| | v1.0.0 | v1.0.1 |
+`libpearl5.so` is unchanged. Mining behaviour, hashrate and the dev-fee
+mechanism are unchanged — verified on real hardware (see below).
+
+| | v1.0.1 | v1.0.2 |
 |---|---|---|
-| `k100-miner` md5 | `7d2a12e5eba0d7fd81aa15403ee0dded` | **same** |
-| `libpearl5.so` md5 | `e464446c956c627f07990e291dbc42dd` | **same** |
-| Bundled README | outdated, no verification guidance | **current, with verification section** |
-| Reproducible build script | — | **`make_release.sh`** |
+| `k100-miner` md5 | `7d2a12e5` | **`ea683cbf`** (rebuilt) |
+| `libpearl5.so` md5 | `e464446c` | `e464446c` (unchanged) |
+| `--help` | shows 8 unused vLLM-style args | **only the 7 real args** |
+| `stop.sh` | kills any process whose argv contains `k100-miner` | **matches `/proc/<pid>/exe` exactly** |
+| Log dir / files | 755 / 644 (world-readable) | **700 / 600** |
+| Pre-install checks | none | **7-item dependency check, aborts before installing** |
+| `start.sh` path | hardcoded `/opt/vllm-fork` | **follows `$DST`** |
 
 > The bundled README deliberately does **not** contain the archive's own SHA256 —
 > that would be self-referential. The authoritative value lives in the repository
@@ -17,12 +25,12 @@
 
 ## Download
 
-**[➡️ k100-miner-v1.0.1-linux-x64.tar.gz](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.1/k100-miner-v1.0.1-linux-x64.tar.gz)** — see the asset below
+**[➡️ k100-miner-v1.0.2-linux-x64.tar.gz](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.2/k100-miner-v1.0.2-linux-x64.tar.gz)** — see the asset below
 
 The SHA256 for this release is published on this page and in the repository README.
 
 ```
-k100-miner-v1.0.1-linux-x64/
+k100-miner-v1.0.2-linux-x64/
 ├── k100-miner        29 MB   the miner (single executable, compiled from C)
 ├── libpearl5.so      121 KB  GPU kernel library
 ├── install.sh        3.4 KB  installer
@@ -59,8 +67,8 @@ recipient, do not use this software.
 ## Quick start
 
 ```bash
-tar xzf k100-miner-v1.0.1-linux-x64.tar.gz
-cd k100-miner-v1.0.1-linux-x64
+tar xzf k100-miner-v1.0.2-linux-x64.tar.gz
+cd k100-miner-v1.0.2-linux-x64
 sudo ./install.sh
 
 export LD_LIBRARY_PATH=/opt/dtk/dtk-26.04/lib64:$LD_LIBRARY_PATH
@@ -89,12 +97,26 @@ Expect `authorize ... result=True` and `[mine]` lines within 10 seconds.
 
 | | |
 |---|---|
-| ✅ Verified | Runs, parses args, prints dev-fee fingerprint, wallet not extractable via `strings` |
-| ✅ Verified | dev fee ratio: 15/15 tests, 72h simulation → 1.991% |
-| ✅ Verified | **Real mining on K100 hardware** — 2026-11-16, Kylin V10, 8× K100_AI, 577 TH/s, 19 accepted / 0 rejected |
-| ✅ Verified | Dev-fee account switch: after ~45 s, 6 shares all `result=True` on the dev account |
-| ✅ Verified | Power scaling 200/250/350/400 W, best efficiency 0.208 TH/W at 250 W |
-| ❌ Not verified | Long-run stability beyond 12 h (the 12 h run used the private build, not this package) |
+| ✅ Verified on **this build** (2026-11-24) | Runs on K100_AI; `--help` shows only the 7 real args; single-card 71.0–71.6 TH/s at 15.3–15.6 ms/attempt; `authorize result=True`; 0 Traceback |
+| ✅ Verified on **this build** | Dev-fee line prints `[devfee] 2.0% 用于开发者 (钱包指纹 sha256:6050486ad79f)`; embedded wallet decrypts and its `sha256[:16]` matches the built-in checksum |
+| ✅ Verified on v1.0.0 (2026-11-16) | Full 8-card run: 577 TH/s at 400 W, 73.9 TH/s single card, 19 accepted / 0 rejected |
+| ✅ Verified on v1.0.0 | Dev-fee account switch after ~45 s: 6 shares all `result=True` on the dev account |
+| ✅ Verified on v1.0.0 | Power scaling 200/250/350/400 W; best efficiency 0.208 TH/W at 250 W |
+| ✅ Verified (all versions) | Dev-fee ratio: 15/15 unit tests, 72-hour simulation → 1.991% |
+| ❌ Not verified | Long-run stability (> 12 h) of **this exact binary**. The 12 h run used the private (0 % fee) build. |
 
-**⇒ This build was verified on real K100_AI hardware on 2026-11-16.**
-**⇒ The only untested dimension is long-run stability of this exact package.**
+**⇒ The v1.0.2 binary was rebuilt and re-verified on real K100_AI hardware on 2026-11-24 (single card).**
+**⇒ The 8-card / power-scaling figures were measured on v1.0.0, whose mining code is identical.**
+**⇒ The only untested dimension is multi-hour stability of this exact binary.**
+
+### About the dev-fee wallet
+
+The wallet is stored XOR-obfuscated with a checksum, **not** encrypted in any
+cryptographically meaningful sense. `strings` will not find it, but someone who
+decompresses the binary's payload can recover the address in minutes. We do not
+claim otherwise.
+
+What *is* enforced is **integrity**: if the wallet ciphertext, the key, or the
+checksum is modified in any way, the miner refuses to start (`exit code 3`).
+So the fee cannot be redirected and cannot be disabled by patching these values.
+
