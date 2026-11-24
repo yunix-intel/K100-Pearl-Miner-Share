@@ -9,19 +9,19 @@ Hygon K100_AI (gfx928 DCU) 用の Pearl (PRL) 採掘ソフトウェアです。
 
 ## 📦 ダウンロード
 
-**[➡️ v1.0.3 をダウンロード](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.3)**
+**[➡️ v1.0.4 をダウンロード](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.4)**
 
 | | |
 |---|---|
-| パッケージ | `k100-miner-v1.0.3-linux-x64.tar.gz` |
+| パッケージ | `k100-miner-v1.0.4-linux-x64.tar.gz` |
 | サイズ | 31.3 MB |
-| SHA256 | `217cbab42e38311b0b23e7fcab938f7e150b20c968be34d240189c16cb9a8665` |
+| SHA256 | `e17c2d87d7e46ae6fcad1a1ac3eacc2c076b20f3b69e66686b613aa33530a22a` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.3/k100-miner-v1.0.3-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.3-linux-x64.tar.gz          # 上記の SHA256 と一致する必要があります
-tar xzf k100-miner-v1.0.3-linux-x64.tar.gz
-cd k100-miner-v1.0.3-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.4/k100-miner-v1.0.4-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.4-linux-x64.tar.gz          # 上記の SHA256 と一致する必要があります
+tar xzf k100-miner-v1.0.4-linux-x64.tar.gz
+cd k100-miner-v1.0.4-linux-x64
 sudo ./install.sh
 ```
 
@@ -43,6 +43,7 @@ sudo ./install.sh
 > | **起動時** | `[devfee] 2.0% 用于开发者 (钱包指纹 sha256:6050486ad79f)` を出力 |
 > | **採掘中** | アカウント切替のたびに累積比率を出力 — 2.0% 付近かを確認できます |
 > | **無効化** | `DEV_FEE_PERMILLE=0`（自己テスト用。無効時は手数料なし）|
+> | **初回切替** | 2% では**最初**の開発者アカウントへの切替に約 2205 秒(**≈37 分**)のユーザー時間が必要です (`job_est/(p/(1−p))`、`job_est≈45s`)。「45 秒後に切替」は誤りで、45 秒は 50% の料率に対応します。 |
 >
 > ### 検証可能性についての正直な説明
 >
@@ -113,13 +114,13 @@ sudo ./install.sh
 **このリポジトリの Release ページが唯一の公式配布チャネルです。** ミラーはありません。
 
 ```bash
-sha256sum k100-miner-v1.0.3-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.4-linux-x64.tar.gz
 ```
 
 v1.0.1 の正しい値:
 
 ```
-217cbab42e38311b0b23e7fcab938f7e150b20c968be34d240189c16cb9a8665
+e17c2d87d7e46ae6fcad1a1ac3eacc2c076b20f3b69e66686b613aa33530a22a
 ```
 
 **チェックサムが一致しない場合は実行しないでください。** 誰かが再パッケージ
@@ -171,8 +172,8 @@ ls /opt/dtk/dtk-26.04/bin/hipcc    # 存在すること
 
 
 ```bash
-tar xzf k100-miner-v1.0.3-linux-x64.tar.gz
-cd k100-miner-v1.0.3-linux-x64
+tar xzf k100-miner-v1.0.4-linux-x64.tar.gz
+cd k100-miner-v1.0.4-linux-x64
 ```
 
 内容:
@@ -512,6 +513,7 @@ POWER_W=300 sudo /opt/vllm-fork/start.sh YOUR_WALLET/YOUR_WORKER
 
 | バージョン | 日付 | 備考 |
 |---|---|---|
+| 1.0.4 | 2026-11-24 | インストーラ修正: **初回インストールが exit 1 しなくなった**(`set -e` 下の `&&` 連鎖); `DST` のパーミッションを広げない; コア固定フォールバックは 32 コア未満でカード数を減らし起動失敗を報告; `start.sh` がライブラリの存在を確認。README に 2% 初回切替 ≈37 分を明記。バイナリ変更なし (`c9a1a6a5`)。|
 | 1.0.3 | 2026-11-24 | **セキュリティリリース.** プールへの TLS を**厳格検証**(v1.0.0–v1.0.2 は `CERT_NONE` で MITM 可能)。ライブラリパスのハードコードを廃止; `stat.sh` は `[MATCH]` で集計(出力されない `[HIT]` の代わり)、`authorize` を share として数えない; コア固定表を自動検出; インストール前に既存ファイルをバックアップ; `--account` 形式検証。ドキュメントを実バイナリに合わせて修正。|
 | 1.0.2 | 2026-11-24 | **バイナリ再ビルド** (`ea683cbf`)。`--help` から未使用の `--model`/`--tensor-parallel-size` 等 8 引数を削除。`stop.sh` は `/proc/<pid>/exe` で厳密一致(無関係プロセスの誤殺を防止)。ログディレクトリ 700/600。インストール前依存性チェック。`start.sh` は `$DST` に追従。|
 | 1.0.1 | 2026-11-24 | ドキュメント更新。バイナリは変更なし (md5 `7d2a12e5`)。同梱 README を更新; 再現可能ビルド用 `make_release.sh` を追加。|

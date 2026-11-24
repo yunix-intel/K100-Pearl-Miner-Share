@@ -100,7 +100,11 @@ fi
 # ── 3. 安装二进制 ──
 echo ""
 echo "  → 目标目录 $DST"
-mkdir -p "$DST"; chmod 755 "$DST"
+if [ -d "$DST" ]; then
+  : # 已存在：不动它的权限（可能是别人设的 700）
+else
+  mkdir -p "$DST"; chmod 755 "$DST"
+fi
 install -m755 "$SRC/k100-miner"    "$DST/k100-miner"
 install -m755 "$SRC/libpearl5.so"  "$DST/libpearl5.so"
 echo "  ✅ k100-miner / libpearl5.so"
@@ -122,9 +126,10 @@ SMI=$DTK/bin/rocm-smi
 BIN=$DST/k100-miner
 LOGDIR=$LOGDIR
 export K100_LIB=$DST/libpearl5.so
+[ -f "\$K100_LIB" ] || { echo "  ❌ 找不到 \$K100_LIB"; exit 1; }
 
 [ -x "\$BIN" ] || { echo "  ❌ 找不到 \$BIN"; exit 1; }
-mkdir -p "\$LOGDIR"; chmod 700 "\$LOGDIR" 2>/dev/null
+mkdir -p "$LOGDIR"; chmod 700 "$LOGDIR" 2>/dev/null
 
 if [ -x "\$SMI" ]; then
   yes | "\$SMI" --setpoweroverdrive "\$POWER_W" >/dev/null 2>&1 \\
@@ -146,23 +151,41 @@ if [ "\$NPROC" -le "\$MAXCPU" ]; then
   echo "  ⚠️  这台机器只有 \$NPROC 个逻辑核（调优表需要 116 个），改用均匀分配"
   # 均匀分：每卡 4 个连续核
   for g in \$(seq 0 15); do CPU[\$g]=""; done
+  NEED=\$(( NCARD * 4 ))
+  if [ "\$NPROC" -lt "\$NEED" ]; then
+    NCARD=\$(( NPROC / 4 ))
+    [ "\$NCARD" -ge 1 ] || NCARD=1
+    echo "  ⚠️  每卡需 4 核，\$NPROC 核最多跑 \$NCARD 张卡（已下调）"
+  fi
 fi
 
+FAILED=0
 for g in \$(seq 0 \$((NCARD-1))); do
   if [ -n "\${CPU[\$g]:-}" ]; then SET="\${CPU[\$g]}"; else
     BASE=\$(( (g * NPROC / NCARD) ))
     SET="\$BASE,\$((BASE+1)),\$((BASE+2)),\$((BASE+3))"
   fi
-  LOG="\$LOGDIR/gpu\$g.log"
+  LOG="$LOGDIR/gpu\$g.log"
   : > "\$LOG"; chmod 600 "\$LOG" 2>/dev/null
   HIP_VISIBLE_DEVICES=\$g nohup nice -n 10 ionice -c2 -n7 taskset -c "\$SET" \\
     "\$BIN" --account "\$ACCT" --m 8192 --n 65536 --k 2048 \\
     >> "\$LOG" 2>&1 &
-  echo "  GPU\$g pid=\$! cpu=\$SET"
+  _pid=\$!
+  echo "  GPU\$g pid=\$_pid cpu=\$SET"
+  sleep 1
+  if ! kill -0 "\$_pid" 2>/dev/null; then
+    echo "     ❌ GPU\$g 启动后立即退出，看 \$LOG"
+    tail -3 "\$LOG" 2>/dev/null | sed 's/^/        /'
+    FAILED=\$((FAILED+1))
+  fi
   sleep 1
 done
+if [ "\$FAILED" -ne 0 ]; then
+  echo "  ⚠️  \$FAILED / \$NCARD 个进程启动失败，先看日志再重试"
+  exit 1
+fi
 echo ""
-echo "  已启动 \$NCARD 个进程；日志 \$LOGDIR/gpuN.log"
+echo "  已启动 \$NCARD 个进程；日志 $LOGDIR/gpuN.log"
 EOS
 
 # ── 5. 停止脚本（按 exe 精确匹配）──
@@ -217,7 +240,7 @@ cat > "$DST/stat.sh" <<EOS
 LOGDIR=$LOGDIR
 echo "=== 各卡算力 ==="
 TOT=0; N=0
-for f in "\$LOGDIR"/gpu*.log; do
+for f in "$LOGDIR"/gpu*.log; do
   [ -f "\$f" ] || continue
   g=\$(basename "\$f" .log); g=\${g#gpu}
   V=\$(grep -oE 'MAC [0-9.]+ TH/s' "\$f" 2>/dev/null | grep -oE '[0-9.]+' | tail -10 \\
@@ -229,14 +252,14 @@ done
 awk -v t="\$TOT" -v n="\$N" 'BEGIN{printf "  ═══════════════\n  合计 %.0f TH/s（%d 卡）\n", t, n}'
 echo ""
 echo "=== share ==="
-cnt() { grep -h "\$1" "\$LOGDIR"/gpu*.log 2>/dev/null | grep -c "\$2" || true; }
+cnt() { grep -h "\$1" "$LOGDIR"/gpu*.log 2>/dev/null | grep -c "\$2" || true; }
 echo "  命中(本地 MATCH)= \$(cnt '\\[MATCH\\] ★★★' '')"
 echo "  已提交(publish)=  \$(cnt '\\[publish\\] job=' '')"
 echo "  接受=             \$(cnt '◀ id=' 'result=True')"
 echo "  拒绝=             \$(cnt '◀ id=' 'result=False')"
 echo ""
 echo "=== devfee 状态 ==="
-grep -h 'devfee' "\$LOGDIR"/gpu*.log 2>/dev/null | tail -4
+grep -h 'devfee' "$LOGDIR"/gpu*.log 2>/dev/null | tail -4
 EOS
 
 chmod 755 "$DST/start.sh" "$DST/stop.sh" "$DST/stat.sh"
@@ -253,4 +276,4 @@ echo "════ 安装完成 ════"
 echo "  启动: sudo $DST/start.sh 你的钱包/K100"
 echo "  状态: $DST/stat.sh"
 echo "  停止: sudo $DST/stop.sh"
-[ -n "${BAK:-}" ] && echo "  还原: cp -p $BAK/* $DST/"
+if [ -n "${BAK:-}" ]; then echo "  还原: cp -p $BAK/* $DST/"; fi

@@ -1,6 +1,6 @@
-# v1.0.3 — Security fix (TLS verification) + doc corrections
+# v1.0.4 — Security fix (TLS verification) + doc corrections
 
-## What changed in v1.0.3
+## What changed in v1.0.4
 
 **Security release — upgrade if you run v1.0.0–v1.0.2.**
 
@@ -17,8 +17,13 @@ valid until 2027-04), so strict verification costs nothing. It is now the defaul
 
 ### Other fixes
 
-| | v1.0.2 | v1.0.3 |
+| | v1.0.3 | v1.0.4 |
 |---|---|---|
+| First install exit code | **1** (bug: `[ -n "$BAK" ] && echo` as last line under `set -e`) | **0** |
+| `DST` permissions | `chmod 755` even on an existing 700 dir | **leaves an existing dir untouched** |
+| Core-pin fallback | could overlap/overflow below 32 cores, failures unreported | **reduces card count and reports failed launches** |
+| Missing library | uncaught `OSError` Traceback | **`start.sh` checks first** |
+| README dev-fee timing | implied “45 s” | **documents ≈2205 s (≈37 min) first switch** |
 | TLS to pool | `CERT_NONE` (accepts anything) | **`CERT_REQUIRED` + hostname check** |
 | `libpearl5.so` location | hardcoded `/opt/vllm-fork/…` — `DST=` installs could not run | `K100_LIB` → beside the binary → old default |
 | `stat.sh` hits | `grep '[HIT]'` — binary never prints it, always 0 | `[MATCH] ★★★` |
@@ -54,15 +59,25 @@ unchanged; verified on real hardware (below).
 
 ## Download
 
-**[➡️ k100-miner-v1.0.3-linux-x64.tar.gz](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.3/k100-miner-v1.0.3-linux-x64.tar.gz)** — see the asset below
+**[➡️ k100-miner-v1.0.4-linux-x64.tar.gz](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.4/k100-miner-v1.0.4-linux-x64.tar.gz)** — see the asset below
 
-The SHA256 for this release is published on this page and in the repository README.
+The SHA256 for this release is:
 
 ```
-k100-miner-v1.0.3-linux-x64/
-├── k100-miner        29 MB   the miner (single executable, compiled from C)
+e17c2d87d7e46ae6fcad1a1ac3eacc2c076b20f3b69e66686b613aa33530a22a
+```
+
+MD5 (convenience only): `fc7e09ee62d106bf99c7f9b8da9adfcf`
+Size: 31,271,276 bytes
+
+The same value appears in the repository README, in SECURITY.md, and is what GitHub
+itself computes for the uploaded asset.
+
+```
+k100-miner-v1.0.4-linux-x64/
+├── k100-miner        31 MB   the miner (single executable, compiled from C)
 ├── libpearl5.so      121 KB  GPU kernel library
-├── install.sh        3.4 KB  installer
+├── install.sh        10.1 KB  installer
 ├── README.md                  English
 ├── README.zh-CN.md            简体中文
 ├── README.ko.md               한국어
@@ -96,15 +111,15 @@ recipient, do not use this software.
 ## Quick start
 
 ```bash
-tar xzf k100-miner-v1.0.3-linux-x64.tar.gz
-cd k100-miner-v1.0.3-linux-x64
+tar xzf k100-miner-v1.0.4-linux-x64.tar.gz
+cd k100-miner-v1.0.4-linux-x64
 sudo ./install.sh
 
 export LD_LIBRARY_PATH=/opt/dtk/dtk-26.04/lib64:$LD_LIBRARY_PATH
 HIP_VISIBLE_DEVICES=0 /opt/vllm-fork/k100-miner --account WALLET/WORKER --m 8192 --n 65536 --k 2048
 ```
 
-Expect `authorize ... result=True` and `[mine]` lines within 10 seconds.
+Expect `authorize ... result=True` and `[compute]` lines within 10 seconds.
 
 ## Performance
 
@@ -132,12 +147,12 @@ Expect `authorize ... result=True` and `[mine]` lines within 10 seconds.
 | ✅ Verified on **this build** | `--account TESTONLY` (no slash) → readable argparse error instead of a Traceback |
 | ✅ Verified on **this build** | Dev-fee line prints `[devfee] 2.0% 用于开发者 (钱包指纹 sha256:6050486ad79f)`; embedded wallet decrypts and its `sha256[:16]` matches the built-in checksum |
 | ✅ Verified on v1.0.0 (2026-11-16) | Full 8-card run: 577 TH/s at 400 W, 73.9 TH/s single card, 19 accepted / 0 rejected |
-| ✅ Verified on v1.0.0 | Dev-fee account switch does happen and shares are accepted on the dev account. **Timing corrected in v1.0.3**: at 2 % the *first* switch needs ≈2205 s (≈37 min) of user time (`job_est/(p/(1−p))`, `job_est≈45 s`). The earlier “≈45 s” figure was wrong — that corresponds to a 50 % rate. |
+| ✅ Verified on v1.0.0 | Dev-fee account switch does happen and shares are accepted on the dev account. **Timing corrected in v1.0.4**: at 2 % the *first* switch needs ≈2205 s (≈37 min) of user time (`job_est/(p/(1−p))`, `job_est≈45 s`). The earlier “≈45 s” figure was wrong — that corresponds to a 50 % rate. |
 | ✅ Verified on v1.0.0 | Power scaling 200/250/350/400 W; best efficiency 0.208 TH/W at 250 W |
 | ✅ Verified (all versions) | Dev-fee ratio: 15/15 unit tests, 72-hour simulation → 1.991% |
 | ❌ Not verified | Long-run stability (> 12 h) of **this exact binary**. The 12 h run used the private (0 % fee) build. |
 
-**⇒ The v1.0.3 binary was rebuilt and re-verified on real K100_AI hardware on 2026-11-24 (single card).**
+**⇒ The v1.0.4 binary was rebuilt and re-verified on real K100_AI hardware on 2026-11-24 (single card).**
 **⇒ The 8-card / power-scaling figures were measured on v1.0.0, whose mining code is identical.**
 **⇒ The only untested dimension is multi-hour stability of this exact binary.**
 

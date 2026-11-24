@@ -9,19 +9,19 @@ A Pearl (PRL) mining application for Hygon K100_AI (gfx928) DCUs.
 
 ## 📦 Download
 
-**[➡️ Download v1.0.3](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.3)**
+**[➡️ Download v1.0.4](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.4)**
 
 | | |
 |---|---|
-| Package | `k100-miner-v1.0.3-linux-x64.tar.gz` |
+| Package | `k100-miner-v1.0.4-linux-x64.tar.gz` |
 | Size | 31.3 MB |
-| SHA256 | `217cbab42e38311b0b23e7fcab938f7e150b20c968be34d240189c16cb9a8665` |
+| SHA256 | `e17c2d87d7e46ae6fcad1a1ac3eacc2c076b20f3b69e66686b613aa33530a22a` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.3/k100-miner-v1.0.3-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.3-linux-x64.tar.gz          # must match the SHA256 above
-tar xzf k100-miner-v1.0.3-linux-x64.tar.gz
-cd k100-miner-v1.0.3-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.4/k100-miner-v1.0.4-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.4-linux-x64.tar.gz          # must match the SHA256 above
+tar xzf k100-miner-v1.0.4-linux-x64.tar.gz
+cd k100-miner-v1.0.4-linux-x64
 sudo ./install.sh
 ```
 
@@ -43,6 +43,7 @@ sudo ./install.sh
 > | **On startup** | prints `[devfee] 2.0% 用于开发者 (钱包指纹 sha256:6050486ad79f)` |
 > | **During mining** | prints the cumulative ratio at every account switch — you can verify it stays near 2.0% |
 > | **Opt-out** | `DEV_FEE_PERMILLE=0` disables it (for self-testing; no fee is paid when disabled) |
+| **First switch** | at 2 %, the **first** switch to the dev account needs ≈2205 s (**≈37 min**) of user time (`job_est/(p/(1−p))`, `job_est≈45 s`). The common "switches after 45 s" claim is wrong — 45 s corresponds to a 50 % rate. |
 >
 > ### Honest statement about verifiability
 >
@@ -115,13 +116,13 @@ Measured **620 TH/s** (8 cards, pool accounting metric).
 We do not publish mirrors.
 
 ```bash
-sha256sum k100-miner-v1.0.3-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.4-linux-x64.tar.gz
 ```
 
-Expected for **v1.0.3**:
+Expected for **v1.0.4**:
 
 ```
-217cbab42e38311b0b23e7fcab938f7e150b20c968be34d240189c16cb9a8665
+e17c2d87d7e46ae6fcad1a1ac3eacc2c076b20f3b69e66686b613aa33530a22a
 ```
 
 **If the checksum does not match, do not run the binary.** Someone may have
@@ -172,8 +173,8 @@ If this fails, install Hygon DTK 26.04 first. **The miner will not start without
 
 
 ```bash
-tar xzf k100-miner-v1.0.3-linux-x64.tar.gz
-cd k100-miner-v1.0.3-linux-x64
+tar xzf k100-miner-v1.0.4-linux-x64.tar.gz
+cd k100-miner-v1.0.4-linux-x64
 ```
 
 Contents:
@@ -513,6 +514,7 @@ fee mechanism is prohibited by the license.
 
 | Version | Date | Notes |
 |---|---|---|
+| 1.0.4 | 2026-11-24 | Installer fixes: **first install no longer exits 1** (`&&`-chain under `set -e`); `DST` permissions no longer widened; core-pin fallback now reduces card count below 32 cores and reports failed launches; `start.sh` checks the library exists. README documents the ≈37 min first dev-fee switch. Binary unchanged (`c9a1a6a5`). |
 | 1.0.3 | 2026-11-24 | **Security release.** TLS to the pool is now **strictly verified** (v1.0.0–v1.0.2 used `CERT_NONE`, allowing MITM). Also: library path no longer hardcoded; `stat.sh` counts `[MATCH]` (not the never-printed `[HIT]`) and no longer counts `authorize` as a share; CPU pin table auto-detects; installer backs up existing files first; `--account` format validated. Docs corrected against the real binary. |
 | 1.0.2 | 2026-11-24 | **Rebuilt binary** (`ea683cbf`). Removed 8 unused `--model`/`--tensor-parallel-size`-style args from `--help`. `stop.sh` now matches by `/proc/<pid>/exe` (no more killing unrelated processes). Log dir 700/600. Pre-install dependency check. `start.sh` follows `$DST`. |
 | 1.0.1 | 2026-11-24 | Documentation update. Binary unchanged (md5 `7d2a12e5`). Bundled READMEs refreshed; `make_release.sh` added for reproducible builds. |

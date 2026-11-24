@@ -17,25 +17,26 @@ ours, and we cannot vouch for it.**
 Every release lists its checksum. Always compare before executing:
 
 ```bash
-sha256sum k100-miner-v1.0.3-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.4-linux-x64.tar.gz
 ```
 
-Expected for **v1.0.3** (current):
+Expected for **v1.0.4** (current):
 
 ```
-217cbab42e38311b0b23e7fcab938f7e150b20c968be34d240189c16cb9a8665
+e17c2d87d7e46ae6fcad1a1ac3eacc2c076b20f3b69e66686b613aa33530a22a
 ```
 
 MD5 (for convenience only — SHA256 is authoritative):
 ```
-cd49f47254bb881f9eefbbf8409acd1d
+fc7e09ee62d106bf99c7f9b8da9adfcf
 ```
 
-Earlier releases — still downloadable, and **v1.0.0–v1.0.2 do not verify the pool's
+Earlier releases — still downloadable. **v1.0.0–v1.0.2 do not verify the pool's
 TLS certificate** (see *Supported versions* below):
 
 | Version | SHA256 | MD5 |
 |---|---|---|
+| v1.0.3 | `217cbab42e38311b0b23e7fcab938f7e150b20c968be34d240189c16cb9a8665` | `cd49f47254bb881f9eefbbf8409acd1d` |
 | v1.0.2 | `ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f` | `e75010575d14c2a40a0c4f5e47e9731c` |
 | v1.0.1 | `d8ed939d9ebc0cbe974dbb34af1cadf91df0863d78af3fc71eb83fbeb13a7f5a` | `b43f899d7463f071b54af7798a40310c` |
 | v1.0.0 | `715fd8679df8fd22d7e592c8b135fc5d04968cc40ad89d6062374d31be07d803` | `a6cbd72188ad077dfe8b58fc1cc36019` |
@@ -110,5 +111,6 @@ moment a new release is published.
 
 | Version | Status | Notes |
 |---|---|---|
-| **v1.0.3** | **current** | strict TLS verification |
+| **v1.0.4** | **current** | installer fixes over v1.0.3; binary identical |
+| v1.0.3 | superseded | strict TLS verification |
 | v1.0.2 and earlier | **unsupported — upgrade** | `verify_mode = CERT_NONE`: any certificate is accepted, so a network attacker can impersonate the pool, read your wallet, front-run valid proofs and feed fake jobs. Do not run these on an untrusted network. |

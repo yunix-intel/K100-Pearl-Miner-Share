@@ -9,19 +9,19 @@
 
 ## 📦 下载
 
-**[➡️ 下载 v1.0.3](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.3)**
+**[➡️ 下载 v1.0.4](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.4)**
 
 | | |
 |---|---|
-| 安装包 | `k100-miner-v1.0.3-linux-x64.tar.gz` |
+| 安装包 | `k100-miner-v1.0.4-linux-x64.tar.gz` |
 | 大小 | 31.3 MB |
-| SHA256 | `217cbab42e38311b0b23e7fcab938f7e150b20c968be34d240189c16cb9a8665` |
+| SHA256 | `e17c2d87d7e46ae6fcad1a1ac3eacc2c076b20f3b69e66686b613aa33530a22a` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.3/k100-miner-v1.0.3-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.3-linux-x64.tar.gz          # 必须与上面的 SHA256 一致
-tar xzf k100-miner-v1.0.3-linux-x64.tar.gz
-cd k100-miner-v1.0.3-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.4/k100-miner-v1.0.4-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.4-linux-x64.tar.gz          # 必须与上面的 SHA256 一致
+tar xzf k100-miner-v1.0.4-linux-x64.tar.gz
+cd k100-miner-v1.0.4-linux-x64
 sudo ./install.sh
 ```
 
@@ -42,6 +42,7 @@ sudo ./install.sh
 > | **启动时** | 打印 `[devfee] 2.0% 用于开发者 (钱包指纹 sha256:6050486ad79f)` |
 > | **运行中** | 每次切换账户都打印累计比例，你可以核对它是否稳定在 2.0% 附近 |
 > | **关闭方式** | `DEV_FEE_PERMILLE=0`（自测用；关闭后不向开发者付费）|
+> | **首次切换** | 2% 下**第一次**切到开发者账户需要约 2205 秒（**≈37 分钟**）用户时长（`job_est/(p/(1−p))`，`job_est≈45s`）。网上流传的「45 秒后切换」是错的 —— 45 秒对应 50% 费率。|
 >
 > ### 关于可验证性的诚实说明
 >
@@ -110,13 +111,13 @@ sudo ./install.sh
 **本仓库的 Release 页面是唯一官方发布渠道**，我们没有镜像。
 
 ```bash
-sha256sum k100-miner-v1.0.3-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.4-linux-x64.tar.gz
 ```
 
 v1.0.1 的正确值：
 
 ```
-217cbab42e38311b0b23e7fcab938f7e150b20c968be34d240189c16cb9a8665
+e17c2d87d7e46ae6fcad1a1ac3eacc2c076b20f3b69e66686b613aa33530a22a
 ```
 
 **校验值对不上就不要运行。** 说明包被人改过。删掉，从 Release 页面重新下载。
@@ -164,8 +165,8 @@ ls /opt/dtk/dtk-26.04/bin/hipcc    # 必须存在
 
 
 ```bash
-tar xzf k100-miner-v1.0.3-linux-x64.tar.gz
-cd k100-miner-v1.0.3-linux-x64
+tar xzf k100-miner-v1.0.4-linux-x64.tar.gz
+cd k100-miner-v1.0.4-linux-x64
 ```
 
 内容：
@@ -495,6 +496,7 @@ POWER_W=300 sudo /opt/vllm-fork/start.sh 你的钱包/你的worker
 
 | 版本 | 日期 | 说明 |
 |---|---|---|
+| 1.0.4 | 2026-11-24 | 安装脚本修复：**首次安装不再 exit 1**（`set -e` 下的 `&&` 链）；不再放宽 `DST` 目录权限；绑核退化分支在 <32 核时下调卡数并报告启动失败；`start.sh` 检查库是否存在。README 补充「2% 首切约 37 分钟」。二进制未变（`c9a1a6a5`）。|
 | 1.0.3 | 2026-11-24 | **安全修复版。** 到矿池的 TLS 改为**严格校验**（v1.0.0–v1.0.2 用 `CERT_NONE`，可被中间人冒充）。另：库路径不再写死；`stat.sh` 用 `[MATCH]` 统计命中（原来 grep 从不打印的 `[HIT]`）、不再把 `authorize` 算成 share；绑核表自适应核数；安装前备份已有文件；`--account` 格式校验。文档按实际二进制修正。|
 | 1.0.2 | 2026-11-24 | **重新编译二进制**（`ea683cbf`）。`--help` 移除 8 个从未被引用的 `--model`/`--tensor-parallel-size` 等参数。`stop.sh` 改为按 `/proc/<pid>/exe` 精确匹配（不再误杀无关进程）。日志目录 700/600。安装前依赖自检。`start.sh` 跟随 `$DST`。|
 | 1.0.1 | 2026-11-24 | 文档更新，二进制未变（md5 `7d2a12e5`）。包内 README 更新；新增 `make_release.sh` 可复现打包。|
