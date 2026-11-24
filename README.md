@@ -5,6 +5,32 @@
 A Pearl (PRL) mining application for Hygon K100_AI (gfx928) DCUs.
 **Distributed as a binary only — no source code is included.**
 
+---
+
+## 📦 Download
+
+**[➡️ Download v1.0.0](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.0)**
+
+| | |
+|---|---|
+| Package | `k100-miner-v1.0.0-linux-x64.tar.gz` |
+| Size | 31.3 MB |
+| SHA256 | `715fd8679df8fd22d7e592c8b135fc5d04968cc40ad89d6062374d31be07d803` |
+
+```bash
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.0/k100-miner-v1.0.0-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.0-linux-x64.tar.gz          # must match the SHA256 above
+tar xzf k100-miner-v1.0.0-linux-x64.tar.gz
+cd k100-miner-v1.0.0-linux-x64
+sudo ./install.sh
+```
+
+> **This repository contains documentation only.** The binary is distributed
+> exclusively through the [Releases page](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases) — we publish no mirrors.
+
+---
+
+
 > ## ⚠️ Developer Fee Disclosure — Please Read Before Use
 >
 > **This software dedicates 2.0% of mining time to the developer.**
@@ -34,6 +60,7 @@ A Pearl (PRL) mining application for Hygon K100_AI (gfx928) DCUs.
 
 ## Contents
 
+- [📦 Download](#-download)
 - [What This Is](#what-this-is)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -133,6 +160,9 @@ ls /opt/dtk/dtk-26.04/bin/hipcc    # must exist
 If this fails, install Hygon DTK 26.04 first. **The miner will not start without it.**
 
 ### Step 2 — Extract the release
+
+> Not downloaded yet? See [📦 Download](#-download) at the top.
+
 
 ```bash
 tar xzf k100-miner-v1.0.0-linux-x64.tar.gz

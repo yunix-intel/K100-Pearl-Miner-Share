@@ -5,6 +5,32 @@
 Hygon K100_AI (gfx928 DCU) 用の Pearl (PRL) 採掘ソフトウェアです。
 **バイナリのみの配布で、ソースコードは含まれません。**
 
+---
+
+## 📦 ダウンロード
+
+**[➡️ v1.0.0 をダウンロード](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.0)**
+
+| | |
+|---|---|
+| パッケージ | `k100-miner-v1.0.0-linux-x64.tar.gz` |
+| サイズ | 31.3 MB |
+| SHA256 | `715fd8679df8fd22d7e592c8b135fc5d04968cc40ad89d6062374d31be07d803` |
+
+```bash
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.0/k100-miner-v1.0.0-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.0-linux-x64.tar.gz          # 上記の SHA256 と一致する必要があります
+tar xzf k100-miner-v1.0.0-linux-x64.tar.gz
+cd k100-miner-v1.0.0-linux-x64
+sudo ./install.sh
+```
+
+> **このリポジトリにはドキュメントのみが含まれます。** バイナリは
+> [Releases ページ](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases) でのみ配布しており、ミラーは公開していません。
+
+---
+
+
 > ## ⚠️ 開発者手数料の開示 — 使用前に必ずお読みください
 >
 > **本ソフトウェアは採掘時間の 2.0% を開発者に充てます。**
@@ -34,6 +60,7 @@ Hygon K100_AI (gfx928 DCU) 用の Pearl (PRL) 採掘ソフトウェアです。
 
 ## 目次
 
+- [📦 ダウンロード](#-ダウンロード)
 - [概要](#概要)
 - [動作要件](#動作要件)
 - [インストール](#インストール)
@@ -133,6 +160,9 @@ ls /opt/dtk/dtk-26.04/bin/hipcc    # 存在すること
 **これがないとマイナーは起動しません。**
 
 ### 手順 2 — 展開
+
+> まだダウンロードしていない場合は、上部の [📦 ダウンロード](#-ダウンロード) をご覧ください。
+
 
 ```bash
 tar xzf k100-miner-v1.0.0-linux-x64.tar.gz

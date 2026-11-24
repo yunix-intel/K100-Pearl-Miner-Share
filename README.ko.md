@@ -5,6 +5,32 @@
 하이곤 K100_AI (gfx928 DCU) 용 Pearl (PRL) 채굴 소프트웨어입니다.
 **바이너리로만 배포되며 소스 코드는 포함되지 않습니다.**
 
+---
+
+## 📦 다운로드
+
+**[➡️ v1.0.0 다운로드](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.0)**
+
+| | |
+|---|---|
+| 패키지 | `k100-miner-v1.0.0-linux-x64.tar.gz` |
+| 크기 | 31.3 MB |
+| SHA256 | `715fd8679df8fd22d7e592c8b135fc5d04968cc40ad89d6062374d31be07d803` |
+
+```bash
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.0/k100-miner-v1.0.0-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.0-linux-x64.tar.gz          # 위의 SHA256과 일치해야 합니다
+tar xzf k100-miner-v1.0.0-linux-x64.tar.gz
+cd k100-miner-v1.0.0-linux-x64
+sudo ./install.sh
+```
+
+> **이 저장소에는 문서만 있습니다.** 바이너리는 [Releases 페이지](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases)를
+> 통해서만 배포하며, 미러는 제공하지 않습니다.
+
+---
+
+
 > ## ⚠️ 개발자 수수료 고지 — 사용 전에 반드시 읽어주세요
 >
 > **이 소프트웨어는 채굴 시간의 2.0%를 개발자에게 사용합니다.**
@@ -34,6 +60,7 @@
 
 ## 목차
 
+- [📦 다운로드](#-다운로드)
 - [개요](#개요)
 - [요구 사항](#요구-사항)
 - [설치](#설치)
@@ -131,6 +158,9 @@ ls /opt/dtk/dtk-26.04/bin/hipcc    # 존재해야 함
 실패하면 하이곤 DTK 26.04를 먼저 설치하세요. **없으면 마이너가 시작되지 않습니다.**
 
 ### 2단계 — 압축 해제
+
+> 아직 다운로드하지 않셨나요? 상단의 [📦 다운로드](#-다운로드)를 참고하세요.
+
 
 ```bash
 tar xzf k100-miner-v1.0.0-linux-x64.tar.gz

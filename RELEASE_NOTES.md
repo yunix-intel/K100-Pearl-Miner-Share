@@ -2,7 +2,11 @@
 
 ## Download
 
-**Download `k100-miner-v1.0.0-linux-x64.tar.gz` from the Assets section below.**
+**[➡️ k100-miner-v1.0.0-linux-x64.tar.gz](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.0/k100-miner-v1.0.0-linux-x64.tar.gz)** — 31,260,265 B
+
+```
+SHA256  715fd8679df8fd22d7e592c8b135fc5d04968cc40ad89d6062374d31be07d803
+```
 
 ```
 k100-miner-v1.0.0-linux-x64/

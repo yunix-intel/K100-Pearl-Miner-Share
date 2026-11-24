@@ -5,6 +5,31 @@
 海光 K100_AI（gfx928 DCU）上的 Pearl (PRL) 挖矿软件。
 **二进制发布，不含源码。**
 
+---
+
+## 📦 下载
+
+**[➡️ 下载 v1.0.0](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.0)**
+
+| | |
+|---|---|
+| 安装包 | `k100-miner-v1.0.0-linux-x64.tar.gz` |
+| 大小 | 31.3 MB |
+| SHA256 | `715fd8679df8fd22d7e592c8b135fc5d04968cc40ad89d6062374d31be07d803` |
+
+```bash
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.0/k100-miner-v1.0.0-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.0-linux-x64.tar.gz          # 必须与上面的 SHA256 一致
+tar xzf k100-miner-v1.0.0-linux-x64.tar.gz
+cd k100-miner-v1.0.0-linux-x64
+sudo ./install.sh
+```
+
+> **本仓库只放文档。** 二进制只通过 [Releases 页面](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases) 发布，我们不发布任何镜像。
+
+---
+
+
 > ## ⚠️ 开发者费用说明 —— 请先阅读再使用
 >
 > **本软件将 2.0% 的挖矿时间用于开发者。**
@@ -32,6 +57,7 @@
 
 ## 目录
 
+- [📦 下载](#-下载)
 - [这是什么](#这是什么)
 - [环境要求](#环境要求)
 - [安装](#安装)
@@ -127,6 +153,9 @@ ls /opt/dtk/dtk-26.04/bin/hipcc    # 必须存在
 **不通过就先装海光 DTK 26.04。没有它程序不会启动。**
 
 ### 第 2 步 —— 解压
+
+> 还没下载？见顶部 [📦 下载](#-下载)。
+
 
 ```bash
 tar xzf k100-miner-v1.0.0-linux-x64.tar.gz
