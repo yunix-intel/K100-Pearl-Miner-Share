@@ -14,7 +14,7 @@ A Pearl (PRL) mining application for Hygon K100_AI (gfx928) DCUs.
 | | |
 |---|---|
 | Package | `k100-miner-v1.0.2-linux-x64.tar.gz` |
-| Size | 29.8 MB |
+| Size | 31.3 MB |
 | SHA256 | `ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f` |
 
 ```bash

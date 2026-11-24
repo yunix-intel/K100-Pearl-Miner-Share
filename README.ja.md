@@ -14,7 +14,7 @@ Hygon K100_AI (gfx928 DCU) 用の Pearl (PRL) 採掘ソフトウェアです。
 | | |
 |---|---|
 | パッケージ | `k100-miner-v1.0.2-linux-x64.tar.gz` |
-| サイズ | 29.8 MB |
+| サイズ | 31.3 MB |
 | SHA256 | `ee009d3b4c53f8f4b6061044338af548825a246d331f2024a421d5211c5ae81f` |
 
 ```bash
