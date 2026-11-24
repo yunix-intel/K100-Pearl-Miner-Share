@@ -9,19 +9,19 @@
 
 ## 📦 下载
 
-**[➡️ 下载 v1.0.0](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.0)**
+**[➡️ 下载 v1.0.1](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.1)**
 
 | | |
 |---|---|
-| 安装包 | `k100-miner-v1.0.0-linux-x64.tar.gz` |
-| 大小 | 31.3 MB |
-| SHA256 | `715fd8679df8fd22d7e592c8b135fc5d04968cc40ad89d6062374d31be07d803` |
+| 安装包 | `k100-miner-v1.0.1-linux-x64.tar.gz` |
+| 大小 | 29.8 MB |
+| SHA256 | `d8ed939d9ebc0cbe974dbb34af1cadf91df0863d78af3fc71eb83fbeb13a7f5a` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.0/k100-miner-v1.0.0-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.0-linux-x64.tar.gz          # 必须与上面的 SHA256 一致
-tar xzf k100-miner-v1.0.0-linux-x64.tar.gz
-cd k100-miner-v1.0.0-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.1/k100-miner-v1.0.1-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.1-linux-x64.tar.gz          # 必须与上面的 SHA256 一致
+tar xzf k100-miner-v1.0.1-linux-x64.tar.gz
+cd k100-miner-v1.0.1-linux-x64
 sudo ./install.sh
 ```
 
@@ -106,13 +106,13 @@ sudo ./install.sh
 **本仓库的 Release 页面是唯一官方发布渠道**，我们没有镜像。
 
 ```bash
-sha256sum k100-miner-v1.0.0-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.1-linux-x64.tar.gz
 ```
 
-v1.0.0 的正确值：
+v1.0.1 的正确值：
 
 ```
-715fd8679df8fd22d7e592c8b135fc5d04968cc40ad89d6062374d31be07d803
+d8ed939d9ebc0cbe974dbb34af1cadf91df0863d78af3fc71eb83fbeb13a7f5a
 ```
 
 **校验值对不上就不要运行。** 说明包被人改过。删掉，从 Release 页面重新下载。
@@ -158,8 +158,8 @@ ls /opt/dtk/dtk-26.04/bin/hipcc    # 必须存在
 
 
 ```bash
-tar xzf k100-miner-v1.0.0-linux-x64.tar.gz
-cd k100-miner-v1.0.0-linux-x64
+tar xzf k100-miner-v1.0.1-linux-x64.tar.gz
+cd k100-miner-v1.0.1-linux-x64
 ```
 
 内容：
@@ -472,4 +472,5 @@ POWER_W=300 sudo /opt/vllm-fork/start.sh 你的钱包/你的worker
 
 | 版本 | 日期 | 说明 |
 |---|---|---|
+| 1.0.1 | 2026-11-24 | 文档更新，二进制未变（md5 `7d2a12e5`）。包内 README 更新；新增 `make_release.sh` 可复现打包。|
 | 1.0.0 | 2026-11-10 | 首个二进制发布版。单卡 72 TH/s，8 卡 620 TH/s。开发者费用 2.0%。|

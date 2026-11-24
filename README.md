@@ -9,19 +9,19 @@ A Pearl (PRL) mining application for Hygon K100_AI (gfx928) DCUs.
 
 ## 📦 Download
 
-**[➡️ Download v1.0.0](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.0)**
+**[➡️ Download v1.0.1](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.1)**
 
 | | |
 |---|---|
-| Package | `k100-miner-v1.0.0-linux-x64.tar.gz` |
-| Size | 31.3 MB |
-| SHA256 | `715fd8679df8fd22d7e592c8b135fc5d04968cc40ad89d6062374d31be07d803` |
+| Package | `k100-miner-v1.0.1-linux-x64.tar.gz` |
+| Size | 29.8 MB |
+| SHA256 | `d8ed939d9ebc0cbe974dbb34af1cadf91df0863d78af3fc71eb83fbeb13a7f5a` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.0/k100-miner-v1.0.0-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.0-linux-x64.tar.gz          # must match the SHA256 above
-tar xzf k100-miner-v1.0.0-linux-x64.tar.gz
-cd k100-miner-v1.0.0-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.1/k100-miner-v1.0.1-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.1-linux-x64.tar.gz          # must match the SHA256 above
+tar xzf k100-miner-v1.0.1-linux-x64.tar.gz
+cd k100-miner-v1.0.1-linux-x64
 sudo ./install.sh
 ```
 
@@ -110,13 +110,13 @@ Measured **620 TH/s** (8 cards, pool accounting metric).
 We do not publish mirrors.
 
 ```bash
-sha256sum k100-miner-v1.0.0-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.1-linux-x64.tar.gz
 ```
 
-Expected for **v1.0.0**:
+Expected for **v1.0.1**:
 
 ```
-715fd8679df8fd22d7e592c8b135fc5d04968cc40ad89d6062374d31be07d803
+d8ed939d9ebc0cbe974dbb34af1cadf91df0863d78af3fc71eb83fbeb13a7f5a
 ```
 
 **If the checksum does not match, do not run the binary.** Someone may have
@@ -165,8 +165,8 @@ If this fails, install Hygon DTK 26.04 first. **The miner will not start without
 
 
 ```bash
-tar xzf k100-miner-v1.0.0-linux-x64.tar.gz
-cd k100-miner-v1.0.0-linux-x64
+tar xzf k100-miner-v1.0.1-linux-x64.tar.gz
+cd k100-miner-v1.0.1-linux-x64
 ```
 
 Contents:
@@ -486,4 +486,5 @@ fee mechanism is prohibited by the license.
 
 | Version | Date | Notes |
 |---|---|---|
+| 1.0.1 | 2026-11-24 | Documentation update. Binary unchanged (md5 `7d2a12e5`). Bundled READMEs refreshed; `make_release.sh` added for reproducible builds. |
 | 1.0.0 | 2026-11-10 | First binary release. 72 TH/s per card, 620 TH/s on 8 cards. 2.0% dev fee. |

@@ -9,19 +9,19 @@ Hygon K100_AI (gfx928 DCU) 用の Pearl (PRL) 採掘ソフトウェアです。
 
 ## 📦 ダウンロード
 
-**[➡️ v1.0.0 をダウンロード](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.0)**
+**[➡️ v1.0.1 をダウンロード](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.1)**
 
 | | |
 |---|---|
-| パッケージ | `k100-miner-v1.0.0-linux-x64.tar.gz` |
-| サイズ | 31.3 MB |
-| SHA256 | `715fd8679df8fd22d7e592c8b135fc5d04968cc40ad89d6062374d31be07d803` |
+| パッケージ | `k100-miner-v1.0.1-linux-x64.tar.gz` |
+| サイズ | 29.8 MB |
+| SHA256 | `d8ed939d9ebc0cbe974dbb34af1cadf91df0863d78af3fc71eb83fbeb13a7f5a` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.0/k100-miner-v1.0.0-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.0-linux-x64.tar.gz          # 上記の SHA256 と一致する必要があります
-tar xzf k100-miner-v1.0.0-linux-x64.tar.gz
-cd k100-miner-v1.0.0-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.1/k100-miner-v1.0.1-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.1-linux-x64.tar.gz          # 上記の SHA256 と一致する必要があります
+tar xzf k100-miner-v1.0.1-linux-x64.tar.gz
+cd k100-miner-v1.0.1-linux-x64
 sudo ./install.sh
 ```
 
@@ -109,13 +109,13 @@ sudo ./install.sh
 **このリポジトリの Release ページが唯一の公式配布チャネルです。** ミラーはありません。
 
 ```bash
-sha256sum k100-miner-v1.0.0-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.1-linux-x64.tar.gz
 ```
 
-v1.0.0 の正しい値:
+v1.0.1 の正しい値:
 
 ```
-715fd8679df8fd22d7e592c8b135fc5d04968cc40ad89d6062374d31be07d803
+d8ed939d9ebc0cbe974dbb34af1cadf91df0863d78af3fc71eb83fbeb13a7f5a
 ```
 
 **チェックサムが一致しない場合は実行しないでください。** 誰かが再パッケージ
@@ -165,8 +165,8 @@ ls /opt/dtk/dtk-26.04/bin/hipcc    # 存在すること
 
 
 ```bash
-tar xzf k100-miner-v1.0.0-linux-x64.tar.gz
-cd k100-miner-v1.0.0-linux-x64
+tar xzf k100-miner-v1.0.1-linux-x64.tar.gz
+cd k100-miner-v1.0.1-linux-x64
 ```
 
 内容:
@@ -487,4 +487,5 @@ POWER_W=300 sudo /opt/vllm-fork/start.sh YOUR_WALLET/YOUR_WORKER
 
 | バージョン | 日付 | 備考 |
 |---|---|---|
+| 1.0.1 | 2026-11-24 | ドキュメント更新。バイナリは変更なし (md5 `7d2a12e5`)。同梱 README を更新; 再現可能ビルド用 `make_release.sh` を追加。|
 | 1.0.0 | 2026-11-10 | 初のバイナリリリース。カードあたり 72 TH/s、8 枚で 620 TH/s。開発者手数料 2.0%。 |

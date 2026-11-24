@@ -9,19 +9,19 @@
 
 ## 📦 다운로드
 
-**[➡️ v1.0.0 다운로드](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.0)**
+**[➡️ v1.0.1 다운로드](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.1)**
 
 | | |
 |---|---|
-| 패키지 | `k100-miner-v1.0.0-linux-x64.tar.gz` |
-| 크기 | 31.3 MB |
-| SHA256 | `715fd8679df8fd22d7e592c8b135fc5d04968cc40ad89d6062374d31be07d803` |
+| 패키지 | `k100-miner-v1.0.1-linux-x64.tar.gz` |
+| 크기 | 29.8 MB |
+| SHA256 | `d8ed939d9ebc0cbe974dbb34af1cadf91df0863d78af3fc71eb83fbeb13a7f5a` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.0/k100-miner-v1.0.0-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.0-linux-x64.tar.gz          # 위의 SHA256과 일치해야 합니다
-tar xzf k100-miner-v1.0.0-linux-x64.tar.gz
-cd k100-miner-v1.0.0-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.1/k100-miner-v1.0.1-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.1-linux-x64.tar.gz          # 위의 SHA256과 일치해야 합니다
+tar xzf k100-miner-v1.0.1-linux-x64.tar.gz
+cd k100-miner-v1.0.1-linux-x64
 sudo ./install.sh
 ```
 
@@ -109,13 +109,13 @@ sudo ./install.sh
 **이 저장소의 Release 페이지가 유일한 공식 배포 채널입니다.** 미러는 없습니다.
 
 ```bash
-sha256sum k100-miner-v1.0.0-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.1-linux-x64.tar.gz
 ```
 
-v1.0.0 의 올바른 값:
+v1.0.1 의 올바른 값:
 
 ```
-715fd8679df8fd22d7e592c8b135fc5d04968cc40ad89d6062374d31be07d803
+d8ed939d9ebc0cbe974dbb34af1cadf91df0863d78af3fc71eb83fbeb13a7f5a
 ```
 
 **체크섬이 일치하지 않으면 실행하지 마세요.** 누군가 다시 패키징한 것입니다.
@@ -163,8 +163,8 @@ ls /opt/dtk/dtk-26.04/bin/hipcc    # 존재해야 함
 
 
 ```bash
-tar xzf k100-miner-v1.0.0-linux-x64.tar.gz
-cd k100-miner-v1.0.0-linux-x64
+tar xzf k100-miner-v1.0.1-linux-x64.tar.gz
+cd k100-miner-v1.0.1-linux-x64
 ```
 
 내용:
@@ -482,4 +482,5 @@ POWER_W=300 sudo /opt/vllm-fork/start.sh YOUR_WALLET/YOUR_WORKER
 
 | 버전 | 날짜 | 비고 |
 |---|---|---|
+| 1.0.1 | 2026-11-24 | 문서 업데이트. 바이너리 변경 없음 (md5 `7d2a12e5`). 패키지 내 README 갱신; 재현 가능한 빌드용 `make_release.sh` 추가. |
 | 1.0.0 | 2026-11-10 | 첫 바이너리 릴리스. 카드당 72 TH/s, 8장 620 TH/s. 개발자 수수료 2.0%. |
