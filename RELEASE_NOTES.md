@@ -76,7 +76,7 @@ k100-miner-v1.0.3-linux-x64/
 This software dedicates **2.0% of mining time** to the developer.
 
 - Rate: **2.0%**, settled strictly by time (72-hour simulation: 1.991%)
-- Dev wallet: **encrypted inside the binary** — never appears in plaintext
+- Dev wallet: **XOR-obfuscated inside the binary** with a checksum — no plaintext copy (`strings` finds nothing; the payload can be unpacked — see below)
 - Wallet fingerprint: `sha256:6050486ad79f`
 - Startup line: `[devfee] 2.0% 用于开发者 (钱包指纹 sha256:6050486ad79f)`
 - Disable: `DEV_FEE_PERMILLE=0`

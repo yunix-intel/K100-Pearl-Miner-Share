@@ -15,7 +15,7 @@ A Pearl (PRL) mining application for Hygon K100_AI (gfx928) DCUs.
 |---|---|
 | Package | `k100-miner-v1.0.3-linux-x64.tar.gz` |
 | Size | 31.3 MB |
-| SHA256 | `9aa31730914424adea8ea4e72d8c47f18c43d5e5d77fec59574105b28ab84b36` |
+| SHA256 | `217cbab42e38311b0b23e7fcab938f7e150b20c968be34d240189c16cb9a8665` |
 
 ```bash
 wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.3/k100-miner-v1.0.3-linux-x64.tar.gz
@@ -121,7 +121,7 @@ sha256sum k100-miner-v1.0.3-linux-x64.tar.gz
 Expected for **v1.0.3**:
 
 ```
-9aa31730914424adea8ea4e72d8c47f18c43d5e5d77fec59574105b28ab84b36
+217cbab42e38311b0b23e7fcab938f7e150b20c968be34d240189c16cb9a8665
 ```
 
 **If the checksum does not match, do not run the binary.** Someone may have
@@ -389,14 +389,18 @@ miner re-authorizes; you will see this in the log:
   [devfee] 切到开发者账户  devfee: dev 43s / user 2150s = 2.00% (目标 2.00%), 切换 1 次
 ```
 
-### 3. Wallet is encrypted inside the binary
+### 3. The wallet is obfuscated, not encrypted
 
 ```
-The developer wallet is NOT a plaintext constant. It is XOR-encrypted ciphertext
+The developer wallet is NOT a plaintext constant: it is XOR-obfuscated ciphertext
 plus a SHA256 integrity check.
 
-- No address fragment can be found with `strings` on the binary
-- Modifying any ciphertext or checksum byte ⇒ exit code 3 at startup
+- `strings` on the binary finds no address fragment
+- Modifying any ciphertext / key / checksum byte ⇒ exit code 3 at startup
+
+⚠️ That is obfuscation, not encryption. Unpack the binary's payload and the address
+   is recoverable in minutes — see "Honest statement about verifiability" above.
+   What is enforced is integrity: the fee cannot be redirected or disabled.
 ```
 
 ### 4. What you can and cannot verify

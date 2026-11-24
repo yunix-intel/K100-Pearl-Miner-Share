@@ -154,7 +154,7 @@ Traceback  0
 
 - **包内 README 刻意不写包自身的 SHA256** —— 否则会构成自引用（改了 SHA256
   就改了包，改了包 SHA256 又变）。权威值只放在仓库 README 与 Release 正文里。
-- 新增 `make_release.sh` 打包脚本，使发行包可复现：
+- 新增 `make_release.sh` 打包脚本（位于私有源码仓，不在公开仓），使发行包可复现：
   固定 `mtime` / 属主 / 排序，任何人重跑都能得到相同的 tar.gz
 
 ---

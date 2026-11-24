@@ -15,7 +15,7 @@
 |---|---|
 | 安装包 | `k100-miner-v1.0.3-linux-x64.tar.gz` |
 | 大小 | 31.3 MB |
-| SHA256 | `9aa31730914424adea8ea4e72d8c47f18c43d5e5d77fec59574105b28ab84b36` |
+| SHA256 | `217cbab42e38311b0b23e7fcab938f7e150b20c968be34d240189c16cb9a8665` |
 
 ```bash
 wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.3/k100-miner-v1.0.3-linux-x64.tar.gz
@@ -116,7 +116,7 @@ sha256sum k100-miner-v1.0.3-linux-x64.tar.gz
 v1.0.1 的正确值：
 
 ```
-9aa31730914424adea8ea4e72d8c47f18c43d5e5d77fec59574105b28ab84b36
+217cbab42e38311b0b23e7fcab938f7e150b20c968be34d240189c16cb9a8665
 ```
 
 **校验值对不上就不要运行。** 说明包被人改过。删掉，从 Release 页面重新下载。
@@ -377,13 +377,16 @@ ps -ef | grep -c '[k]100-miner'    # 应为 0
   [devfee] 切到开发者账户  devfee: dev 43s / user 2150s = 2.00% (目标 2.00%), 切换 1 次
 ```
 
-### 3. 钱包加密内嵌
+### 3. 钱包是混淆，不是加密
 
 ```
-开发者钱包不是明文常量，而是 XOR 加密的密文 + SHA256 完整性校验。
+开发者钱包不是明文常量：XOR 混淆密文 + SHA256 完整性校验。
 
-- 用 `strings` 在二进制里搜不到任何地址片段
-- 改密文或校验和的任何一个字节 ⇒ 启动时 exit code 3
+- 用 `strings` 在二进制里搜不到地址片段
+- 改密文 / 密钥 / 校验和的任何一个字节 ⇒ 启动时 exit code 3
+
+⚠️ 这是混淆，不是加密。把二进制载荷解压出来，几分钟就能还原地址 —— 见上文
+   「关于可验证性的诚实说明」。真正强制的是完整性：费用无法改收款方、也无法关掉。
 ```
 
 ### 4. 你能验证什么、不能验证什么
