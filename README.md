@@ -83,12 +83,12 @@ sudo ./install.sh
 ## What This Is
 
 A complete Pearl mining solution for an 8-card Hygon K100_AI system.
-Measured **620 TH/s** (8 cards, pool accounting metric).
+Measured **577 TH/s** (8 cards, pool accounting metric).
 
 | Item | Value |
 |---|---|
 | Per-card hashrate | 72 TH/s |
-| 8-card total | 620 TH/s (pool-reported; climbs as the rolling window fills) |
+| 8-card total | 577 TH/s (pool-reported; the pool's rolling window can briefly show ~620 during warm-up) |
 | Per attempt | 15.38 ms |
 | Power | 400 W/card (`power1_cap_max` — hardware ceiling) |
 | Temperature | Tj 78–82 °C |
@@ -518,4 +518,4 @@ fee mechanism is prohibited by the license.
 | 1.0.3 | 2026-11-24 | **Security release.** TLS to the pool is now **strictly verified** (v1.0.0–v1.0.2 used `CERT_NONE`, allowing MITM). Also: library path no longer hardcoded; `stat.sh` counts `[MATCH]` (not the never-printed `[HIT]`) and no longer counts `authorize` as a share; CPU pin table auto-detects; installer backs up existing files first; `--account` format validated. Docs corrected against the real binary. |
 | 1.0.2 | 2026-11-24 | **Rebuilt binary** (`ea683cbf`). Removed 8 unused `--model`/`--tensor-parallel-size`-style args from `--help`. `stop.sh` now matches by `/proc/<pid>/exe` (no more killing unrelated processes). Log dir 700/600. Pre-install dependency check. `start.sh` follows `$DST`. |
 | 1.0.1 | 2026-11-24 | Documentation update. Binary unchanged (md5 `7d2a12e5`). Bundled READMEs refreshed; `make_release.sh` added for reproducible builds. |
-| 1.0.0 | 2026-11-10 | First binary release. 72 TH/s per card, 620 TH/s on 8 cards. 2.0% dev fee. |
+| 1.0.0 | 2026-11-10 | First binary release. 72 TH/s per card, 577 TH/s on 8 cards. 2.0% dev fee. |
