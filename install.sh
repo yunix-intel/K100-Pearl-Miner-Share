@@ -160,9 +160,10 @@ if [ "\$NPROC" -le "\$MAXCPU" ]; then
 fi
 
 FAILED=0
-for g in \$(seq 0 \$((NCARD-1))); do
+launch_one() {
+  local g=\$1
   if [ -n "\${CPU[\$g]:-}" ]; then SET="\${CPU[\$g]}"; else
-    BASE=\$(( (g * NPROC / NCARD) ))
+    local BASE=\$(( (g * NPROC / NCARD) ))
     SET="\$BASE,\$((BASE+1)),\$((BASE+2)),\$((BASE+3))"
   fi
   LOG="$LOGDIR/gpu\$g.log"
@@ -170,18 +171,33 @@ for g in \$(seq 0 \$((NCARD-1))); do
   HIP_VISIBLE_DEVICES=\$g nohup nice -n 10 ionice -c2 -n7 taskset -c "\$SET" \\
     "\$BIN" --account "\$ACCT" --m 8192 --n 65536 --k 2048 \\
     >> "\$LOG" 2>&1 &
-  _pid=\$!
-  echo "  GPU\$g pid=\$_pid cpu=\$SET"
-  sleep 1
-  if ! kill -0 "\$_pid" 2>/dev/null; then
-    echo "     ❌ GPU\$g 启动后立即退出，看 \$LOG"
+  echo \$!
+}
+
+# ★ v1.0.5：矿池对同 IP 的连接频率限流（实测窗口约 80 秒）。N 张卡同时连接会在
+#   TLS 握手阶段被拒（UNEXPECTED_EOF_WHILE_READING），旧版直接 exit 1 留下半残状态。
+#   改为逐卡错峰启动（间隔 6 秒）+ 每卡最多 6 次退避重试（每次 40 秒）。
+for g in \$(seq 0 \$((NCARD-1))); do
+  _ok=0
+  for _try in 1 2 3 4 5 6; do
+    _pid=\$(launch_one \$g)
+    echo "  GPU\$g pid=\$_pid （第\${_try}次）"
+    sleep 12
+    if kill -0 "\$_pid" 2>/dev/null; then
+      _ok=1; break
+    fi
+    echo "     ⚠️  GPU\$g 连接被限流，40 秒后重试"
+    sleep 40
+  done
+  if [ "\$_ok" -ne 1 ]; then
+    echo "     ❌ GPU\$g 6 次都没连上，看 \$LOG"
     tail -3 "\$LOG" 2>/dev/null | sed 's/^/        /'
     FAILED=\$((FAILED+1))
   fi
-  sleep 1
+  sleep 6
 done
 if [ "\$FAILED" -ne 0 ]; then
-  echo "  ⚠️  \$FAILED / \$NCARD 个进程启动失败，先看日志再重试"
+  echo "  ⚠️  \$FAILED / \$NCARD 个进程启动失败，重跑 start.sh 可补上"
   exit 1
 fi
 echo ""

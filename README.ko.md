@@ -9,19 +9,19 @@
 
 ## 📦 다운로드
 
-**[➡️ v1.0.4 다운로드](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.4)**
+**[➡️ v1.0.5 다운로드](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.5)**
 
 | | |
 |---|---|
-| 패키지 | `k100-miner-v1.0.4-linux-x64.tar.gz` |
+| 패키지 | `k100-miner-v1.0.5-linux-x64.tar.gz` |
 | 크기 | 31.3 MB |
-| SHA256 | `e17c2d87d7e46ae6fcad1a1ac3eacc2c076b20f3b69e66686b613aa33530a22a` |
+| SHA256 | `91edbbaeab26d0aeb33a0b5c216398e892aee685dc070722dee4f27f8363f50d` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.4/k100-miner-v1.0.4-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.4-linux-x64.tar.gz          # 위의 SHA256과 일치해야 합니다
-tar xzf k100-miner-v1.0.4-linux-x64.tar.gz
-cd k100-miner-v1.0.4-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.5/k100-miner-v1.0.5-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.5-linux-x64.tar.gz          # 위의 SHA256과 일치해야 합니다
+tar xzf k100-miner-v1.0.5-linux-x64.tar.gz
+cd k100-miner-v1.0.5-linux-x64
 sudo ./install.sh
 ```
 
@@ -114,13 +114,13 @@ sudo ./install.sh
 **이 저장소의 Release 페이지가 유일한 공식 배포 채널입니다.** 미러는 없습니다.
 
 ```bash
-sha256sum k100-miner-v1.0.4-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.5-linux-x64.tar.gz
 ```
 
 v1.0.1 의 올바른 값:
 
 ```
-e17c2d87d7e46ae6fcad1a1ac3eacc2c076b20f3b69e66686b613aa33530a22a
+91edbbaeab26d0aeb33a0b5c216398e892aee685dc070722dee4f27f8363f50d
 ```
 
 **체크섬이 일치하지 않으면 실행하지 마세요.** 누군가 다시 패키징한 것입니다.
@@ -170,8 +170,8 @@ ls /opt/dtk/dtk-26.04/bin/hipcc    # 존재해야 함
 
 
 ```bash
-tar xzf k100-miner-v1.0.4-linux-x64.tar.gz
-cd k100-miner-v1.0.4-linux-x64
+tar xzf k100-miner-v1.0.5-linux-x64.tar.gz
+cd k100-miner-v1.0.5-linux-x64
 ```
 
 내용:
@@ -508,6 +508,7 @@ POWER_W=300 sudo /opt/vllm-fork/start.sh YOUR_WALLET/YOUR_WORKER
 
 | 버전 | 날짜 | 비고 |
 |---|---|---|
+| 1.0.5 | 2026-11-26 | **신뢰성 수정**: 풀 연결 종료 후 자동 재연결 (이전에는 share 약 42% 손실); 시작 시 간격+재시도 |
 | 1.0.4 | 2026-11-24 | 설치 스크립트 수정: **최초 설치가 더 이상 exit 1 이 아님** (`set -e` 하의 `&&` 체인); `DST` 디렉터리 권한을 넓히지 않음; 코어 고정 폴백이 32 코어 미만에서 카드 수를 줄이고 시작 실패를 보고; `start.sh` 가 라이브러리 존재 확인. README 에 2% 첫 전환 ≈37분 명시. 바이너리 변경 없음 (`c9a1a6a5`). |
 | 1.0.3 | 2026-11-24 | **보안 릴리스.** 풀 TLS **엄격 검증**(v1.0.0–v1.0.2 는 `CERT_NONE` 으로 MITM 가능). 라이브러리 경로 하드코딩 제거; `stat.sh` 가 `[MATCH]` 로 집계(출력되지 않는 `[HIT]` 대신), `authorize` 를 share 로 세지 않음; 코어 고정표 자동 감지; 설치 전 기존 파일 백업; `--account` 형식 검증. 문서를 실제 바이너리에 맞게 수정. |
 | 1.0.2 | 2026-11-24 | **바이너리 재빌드** (`ea683cbf`). `--help`에서 미사용 `--model`/`--tensor-parallel-size` 등 8개 인자 제거. `stop.sh`가 `/proc/<pid>/exe`로 정확히 매칭(무관 프로세스 오살해 방지). 로그 디렉터리 700/600. 설치 전 의존성 점검. `start.sh`가 `$DST`를 따름. |

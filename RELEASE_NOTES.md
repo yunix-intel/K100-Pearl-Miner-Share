@@ -1,3 +1,58 @@
+# v1.0.5 — Reliability fix: reconnect + startup rate-limit
+
+## What changed in v1.0.5
+
+**Upgrade if you run any earlier version.** This fixes a bug that silently drops
+~42% of your shares after the pool closes the connection.
+
+### 🔴 The miner never reconnected after the pool closed the connection
+
+`reconnect()` cleared the `dead` flag at the start and then returned on a failed
+`connect()` **without setting it back**. The main loop's watchdog checks `if st.dead`
+— it never fired again — and `submit()` skipped every share because `sock is None`.
+Only a manual restart recovered it.
+
+**Measured on an 8-card rig**: after one disconnect, 18 hours produced
+`✅ reconnected` **0 times** and `连接已断` **1414 times**, dropping **42% of shares**
+(426 TH/s locally, ~250 TH/s reported by the pool).
+
+**Fix**: set `s.dead = True` on failed `connect()`, also when `submit()` sees a null
+socket, and shorten the backoff from 5 s to 3 s.
+
+**Verified** by an independent tester who force-closed all 8 pool connections with
+`gdb` (`ss -K` is a no-op on some kernels). All 8 recovered automatically,
+`✅ reconnected` incremented for every worker, and `连接已断` stayed at **0**.
+
+### 🟠 Startup could be rejected by the pool's per-IP connection rate limit
+
+The pool throttles connections from the same source IP (measured window ≈80 s).
+The old `start.sh` launched cards 1 s apart, so several would fail at the TLS
+handshake (`UNEXPECTED_EOF_WHILE_READING`) and the script exited 1.
+
+**Fix**: staggered launch (6 s apart) with up to 6 backoff retries per card.
+
+### 🔒 构建产物清理
+
+本版重新构建了 Rust 扩展与 Python 扩展，并清除了二进制中的构建机路径
+（用户主目录与源码目录结构），发布包内不再包含开发者的构建目录信息。
+
+### 📋 How to upgrade
+
+```bash
+tar xzf k100-miner-v1.0.5-linux-x64.tar.gz
+cd k100-miner-v1.0.5-linux-x64
+sudo ./install.sh
+```
+
+`install.sh` backs up the previous version automatically. **Restart the miner once**
+(`stop.sh` then `start.sh`) so the new binary takes effect.
+
+### Checksums
+
+See the Release page for the authoritative SHA256 of the archive.
+
+---
+
 # v1.0.4 — Security fix (TLS verification) + doc corrections
 
 ## What changed in v1.0.4

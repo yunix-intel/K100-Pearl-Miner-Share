@@ -9,19 +9,19 @@ Hygon K100_AI (gfx928 DCU) 用の Pearl (PRL) 採掘ソフトウェアです。
 
 ## 📦 ダウンロード
 
-**[➡️ v1.0.4 をダウンロード](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.4)**
+**[➡️ v1.0.5 をダウンロード](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.5)**
 
 | | |
 |---|---|
-| パッケージ | `k100-miner-v1.0.4-linux-x64.tar.gz` |
+| パッケージ | `k100-miner-v1.0.5-linux-x64.tar.gz` |
 | サイズ | 31.3 MB |
-| SHA256 | `e17c2d87d7e46ae6fcad1a1ac3eacc2c076b20f3b69e66686b613aa33530a22a` |
+| SHA256 | `91edbbaeab26d0aeb33a0b5c216398e892aee685dc070722dee4f27f8363f50d` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.4/k100-miner-v1.0.4-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.4-linux-x64.tar.gz          # 上記の SHA256 と一致する必要があります
-tar xzf k100-miner-v1.0.4-linux-x64.tar.gz
-cd k100-miner-v1.0.4-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.5/k100-miner-v1.0.5-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.5-linux-x64.tar.gz          # 上記の SHA256 と一致する必要があります
+tar xzf k100-miner-v1.0.5-linux-x64.tar.gz
+cd k100-miner-v1.0.5-linux-x64
 sudo ./install.sh
 ```
 
@@ -114,13 +114,13 @@ sudo ./install.sh
 **このリポジトリの Release ページが唯一の公式配布チャネルです。** ミラーはありません。
 
 ```bash
-sha256sum k100-miner-v1.0.4-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.5-linux-x64.tar.gz
 ```
 
 v1.0.1 の正しい値:
 
 ```
-e17c2d87d7e46ae6fcad1a1ac3eacc2c076b20f3b69e66686b613aa33530a22a
+91edbbaeab26d0aeb33a0b5c216398e892aee685dc070722dee4f27f8363f50d
 ```
 
 **チェックサムが一致しない場合は実行しないでください。** 誰かが再パッケージ
@@ -172,8 +172,8 @@ ls /opt/dtk/dtk-26.04/bin/hipcc    # 存在すること
 
 
 ```bash
-tar xzf k100-miner-v1.0.4-linux-x64.tar.gz
-cd k100-miner-v1.0.4-linux-x64
+tar xzf k100-miner-v1.0.5-linux-x64.tar.gz
+cd k100-miner-v1.0.5-linux-x64
 ```
 
 内容:
@@ -513,6 +513,7 @@ POWER_W=300 sudo /opt/vllm-fork/start.sh YOUR_WALLET/YOUR_WORKER
 
 | バージョン | 日付 | 備考 |
 |---|---|---|
+| 1.0.5 | 2026-11-26 | **信頼性修正**: プール切断後の自動再接続（従来は share の約 42% を喪失）; 起動をずらして再試行 |
 | 1.0.4 | 2026-11-24 | インストーラ修正: **初回インストールが exit 1 しなくなった**(`set -e` 下の `&&` 連鎖); `DST` のパーミッションを広げない; コア固定フォールバックは 32 コア未満でカード数を減らし起動失敗を報告; `start.sh` がライブラリの存在を確認。README に 2% 初回切替 ≈37 分を明記。バイナリ変更なし (`c9a1a6a5`)。|
 | 1.0.3 | 2026-11-24 | **セキュリティリリース.** プールへの TLS を**厳格検証**(v1.0.0–v1.0.2 は `CERT_NONE` で MITM 可能)。ライブラリパスのハードコードを廃止; `stat.sh` は `[MATCH]` で集計(出力されない `[HIT]` の代わり)、`authorize` を share として数えない; コア固定表を自動検出; インストール前に既存ファイルをバックアップ; `--account` 形式検証。ドキュメントを実バイナリに合わせて修正。|
 | 1.0.2 | 2026-11-24 | **バイナリ再ビルド** (`ea683cbf`)。`--help` から未使用の `--model`/`--tensor-parallel-size` 等 8 引数を削除。`stop.sh` は `/proc/<pid>/exe` で厳密一致(無関係プロセスの誤殺を防止)。ログディレクトリ 700/600。インストール前依存性チェック。`start.sh` は `$DST` に追従。|

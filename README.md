@@ -9,19 +9,19 @@ A Pearl (PRL) mining application for Hygon K100_AI (gfx928) DCUs.
 
 ## 📦 Download
 
-**[➡️ Download v1.0.4](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.4)**
+**[➡️ Download v1.0.5](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.5)**
 
 | | |
 |---|---|
-| Package | `k100-miner-v1.0.4-linux-x64.tar.gz` |
+| Package | `k100-miner-v1.0.5-linux-x64.tar.gz` |
 | Size | 31.3 MB |
-| SHA256 | `e17c2d87d7e46ae6fcad1a1ac3eacc2c076b20f3b69e66686b613aa33530a22a` |
+| SHA256 | `91edbbaeab26d0aeb33a0b5c216398e892aee685dc070722dee4f27f8363f50d` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.4/k100-miner-v1.0.4-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.4-linux-x64.tar.gz          # must match the SHA256 above
-tar xzf k100-miner-v1.0.4-linux-x64.tar.gz
-cd k100-miner-v1.0.4-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.5/k100-miner-v1.0.5-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.5-linux-x64.tar.gz          # must match the SHA256 above
+tar xzf k100-miner-v1.0.5-linux-x64.tar.gz
+cd k100-miner-v1.0.5-linux-x64
 sudo ./install.sh
 ```
 
@@ -116,13 +116,13 @@ Measured **577 TH/s** (8 cards, pool accounting metric).
 We do not publish mirrors.
 
 ```bash
-sha256sum k100-miner-v1.0.4-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.5-linux-x64.tar.gz
 ```
 
-Expected for **v1.0.4**:
+Expected for **v1.0.5**:
 
 ```
-e17c2d87d7e46ae6fcad1a1ac3eacc2c076b20f3b69e66686b613aa33530a22a
+91edbbaeab26d0aeb33a0b5c216398e892aee685dc070722dee4f27f8363f50d
 ```
 
 **If the checksum does not match, do not run the binary.** Someone may have
@@ -173,8 +173,8 @@ If this fails, install Hygon DTK 26.04 first. **The miner will not start without
 
 
 ```bash
-tar xzf k100-miner-v1.0.4-linux-x64.tar.gz
-cd k100-miner-v1.0.4-linux-x64
+tar xzf k100-miner-v1.0.5-linux-x64.tar.gz
+cd k100-miner-v1.0.5-linux-x64
 ```
 
 Contents:
@@ -514,6 +514,7 @@ fee mechanism is prohibited by the license.
 
 | Version | Date | Notes |
 |---|---|---|
+| 1.0.5 | 2026-11-26 | **Reliability fix**: reconnect after pool disconnect (was dropping ~42% of shares); staggered startup with retries |
 | 1.0.4 | 2026-11-24 | Installer fixes: **first install no longer exits 1** (`&&`-chain under `set -e`); `DST` permissions no longer widened; core-pin fallback now reduces card count below 32 cores and reports failed launches; `start.sh` checks the library exists. README documents the ≈37 min first dev-fee switch. Binary unchanged (`c9a1a6a5`). |
 | 1.0.3 | 2026-11-24 | **Security release.** TLS to the pool is now **strictly verified** (v1.0.0–v1.0.2 used `CERT_NONE`, allowing MITM). Also: library path no longer hardcoded; `stat.sh` counts `[MATCH]` (not the never-printed `[HIT]`) and no longer counts `authorize` as a share; CPU pin table auto-detects; installer backs up existing files first; `--account` format validated. Docs corrected against the real binary. |
 | 1.0.2 | 2026-11-24 | **Rebuilt binary** (`ea683cbf`). Removed 8 unused `--model`/`--tensor-parallel-size`-style args from `--help`. `stop.sh` now matches by `/proc/<pid>/exe` (no more killing unrelated processes). Log dir 700/600. Pre-install dependency check. `start.sh` follows `$DST`. |

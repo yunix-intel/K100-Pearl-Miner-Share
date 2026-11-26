@@ -9,19 +9,19 @@
 
 ## 📦 下载
 
-**[➡️ 下载 v1.0.4](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.4)**
+**[➡️ 下载 v1.0.5](https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/tag/v1.0.5)**
 
 | | |
 |---|---|
-| 安装包 | `k100-miner-v1.0.4-linux-x64.tar.gz` |
+| 安装包 | `k100-miner-v1.0.5-linux-x64.tar.gz` |
 | 大小 | 31.3 MB |
-| SHA256 | `e17c2d87d7e46ae6fcad1a1ac3eacc2c076b20f3b69e66686b613aa33530a22a` |
+| SHA256 | `91edbbaeab26d0aeb33a0b5c216398e892aee685dc070722dee4f27f8363f50d` |
 
 ```bash
-wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.4/k100-miner-v1.0.4-linux-x64.tar.gz
-sha256sum k100-miner-v1.0.4-linux-x64.tar.gz          # 必须与上面的 SHA256 一致
-tar xzf k100-miner-v1.0.4-linux-x64.tar.gz
-cd k100-miner-v1.0.4-linux-x64
+wget https://github.com/yunix-intel/K100-Pearl-Miner-Share/releases/download/v1.0.5/k100-miner-v1.0.5-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.5-linux-x64.tar.gz          # 必须与上面的 SHA256 一致
+tar xzf k100-miner-v1.0.5-linux-x64.tar.gz
+cd k100-miner-v1.0.5-linux-x64
 sudo ./install.sh
 ```
 
@@ -111,13 +111,13 @@ sudo ./install.sh
 **本仓库的 Release 页面是唯一官方发布渠道**，我们没有镜像。
 
 ```bash
-sha256sum k100-miner-v1.0.4-linux-x64.tar.gz
+sha256sum k100-miner-v1.0.5-linux-x64.tar.gz
 ```
 
 v1.0.1 的正确值：
 
 ```
-e17c2d87d7e46ae6fcad1a1ac3eacc2c076b20f3b69e66686b613aa33530a22a
+91edbbaeab26d0aeb33a0b5c216398e892aee685dc070722dee4f27f8363f50d
 ```
 
 **校验值对不上就不要运行。** 说明包被人改过。删掉，从 Release 页面重新下载。
@@ -165,8 +165,8 @@ ls /opt/dtk/dtk-26.04/bin/hipcc    # 必须存在
 
 
 ```bash
-tar xzf k100-miner-v1.0.4-linux-x64.tar.gz
-cd k100-miner-v1.0.4-linux-x64
+tar xzf k100-miner-v1.0.5-linux-x64.tar.gz
+cd k100-miner-v1.0.5-linux-x64
 ```
 
 内容：
@@ -496,6 +496,7 @@ POWER_W=300 sudo /opt/vllm-fork/start.sh 你的钱包/你的worker
 
 | 版本 | 日期 | 说明 |
 |---|---|---|
+| 1.0.5 | 2026-11-26 | **可靠性修复**：矿池断连后自动重连（此前会丢约 42% 的 share）；启动改为错峰+重试 |
 | 1.0.4 | 2026-11-24 | 安装脚本修复：**首次安装不再 exit 1**（`set -e` 下的 `&&` 链）；不再放宽 `DST` 目录权限；绑核退化分支在 <32 核时下调卡数并报告启动失败；`start.sh` 检查库是否存在。README 补充「2% 首切约 37 分钟」。二进制未变（`c9a1a6a5`）。|
 | 1.0.3 | 2026-11-24 | **安全修复版。** 到矿池的 TLS 改为**严格校验**（v1.0.0–v1.0.2 用 `CERT_NONE`，可被中间人冒充）。另：库路径不再写死；`stat.sh` 用 `[MATCH]` 统计命中（原来 grep 从不打印的 `[HIT]`）、不再把 `authorize` 算成 share；绑核表自适应核数；安装前备份已有文件；`--account` 格式校验。文档按实际二进制修正。|
 | 1.0.2 | 2026-11-24 | **重新编译二进制**（`ea683cbf`）。`--help` 移除 8 个从未被引用的 `--model`/`--tensor-parallel-size` 等参数。`stop.sh` 改为按 `/proc/<pid>/exe` 精确匹配（不再误杀无关进程）。日志目录 700/600。安装前依赖自检。`start.sh` 跟随 `$DST`。|
